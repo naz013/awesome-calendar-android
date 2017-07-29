@@ -58,7 +58,7 @@ public class MonthWeekView extends View {
     private List<Rect> mDayCells = new ArrayList<>();
     private List<WeekRow> mWeekCells = new ArrayList<>();
 
-    private MotionEvent mLastEvent;
+    private int mLastEvent;
     private float mLastX;
     private float mLastY;
 
@@ -110,14 +110,14 @@ public class MonthWeekView extends View {
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         this.mPaint = new Paint();
         this.mPaint.setAntiAlias(true);
-        this.mPaint.setColor(Color.WHITE);
+        this.mPaint.setColor(Color.BLACK);
         this.mPaint.setStyle(Paint.Style.STROKE);
         this.mPaint.setTextSize(30f);
         this.mPaint.setTextAlign(Paint.Align.CENTER);
 
         this.mEventsPaint = new Paint();
         this.mEventsPaint.setAntiAlias(true);
-        this.mEventsPaint.setColor(Color.WHITE);
+        this.mEventsPaint.setColor(Color.BLACK);
         this.mEventsPaint.setStyle(Paint.Style.FILL);
 
         mAnimator = new CollapseExpandAnimator(this);
@@ -191,7 +191,6 @@ public class MonthWeekView extends View {
     private void drawCells(Canvas canvas) {
         for (int i = 0; i < mDayCells.size(); i++) {
             Rect cell = mDayCells.get(i);
-            Log.d(TAG, "drawCells: " + cell);
             canvas.drawRect(cell, mPaint);
             int day = mDateTimes.get(i).getDay();
             drawRectText("" + day, canvas, cell);
@@ -206,10 +205,13 @@ public class MonthWeekView extends View {
     }
 
     private void measureCells() {
-        Rect rect = new Rect();
-        getLocalVisibleRect(rect);
-        int cellWidth = rect.width() / COLS;
-        int cellHeight = rect.height() / ROWS;
+        int w = getWidth();
+        int h = getHeight();
+        if (w == 0 && h == 0) {
+            return;
+        }
+        int cellWidth = w / COLS;
+        int cellHeight = h / ROWS;
         mDayCells.clear();
         mWeekCells.clear();
         int c = 0;
@@ -219,7 +221,6 @@ public class MonthWeekView extends View {
                 int top = i * cellHeight;
                 int left = j * cellWidth;
                 Rect tmp = new Rect(left, top, left + cellWidth, top + cellHeight);
-                Log.d(TAG, "measureCells: " + tmp);
                 mDayCells.add(tmp);
                 cells.add(tmp);
                 if (mDateTimes.get(c).isSameDayAs(mDate)) {
@@ -233,7 +234,6 @@ public class MonthWeekView extends View {
             }
         }
         Collections.reverse(mWeekCells);
-        Log.d(TAG, "measureCells: " + mWeekCells);
         mAnimator.setWeeks(mWeekCells);
     }
 
@@ -247,7 +247,7 @@ public class MonthWeekView extends View {
                 return true;
             case MotionEvent.ACTION_UP:
                 return processUp(event);
-            case MotionEvent.ACTION_HOVER_MOVE:
+            case MotionEvent.ACTION_MOVE:
                 processMove(event);
                 return true;
         }
@@ -256,10 +256,11 @@ public class MonthWeekView extends View {
 
     private void processMove(MotionEvent event) {
         mAnimator.animate((int) event.getX(), (int) event.getY());
+        mLastEvent = event.getAction();
     }
 
     private boolean processUp(MotionEvent event) {
-        if (mLastEvent.getAction() == MotionEvent.ACTION_DOWN) {
+        if (mLastEvent == MotionEvent.ACTION_DOWN) {
             int touchedPosition = getSelectedPosition(mLastX, mLastY);
             int releasedPosition = getSelectedPosition(event.getX(), event.getY());
             if (touchedPosition != -1 && releasedPosition != -1 && touchedPosition == releasedPosition) {
@@ -268,7 +269,7 @@ public class MonthWeekView extends View {
                 }
                 return super.performClick();
             }
-        } else if (mLastEvent.getAction() == MotionEvent.ACTION_MOVE) {
+        } else if (mLastEvent == MotionEvent.ACTION_MOVE) {
             if (event.getY() - mLastY > 0) {
                 mAnimator.expand((int) event.getX(), (int) event.getY());
             } else {
@@ -279,9 +280,10 @@ public class MonthWeekView extends View {
     }
 
     private void processDown(MotionEvent event) {
-        mLastEvent = event;
         mLastX = event.getX();
         mLastY = event.getY();
+        mLastEvent = event.getAction();
+        mAnimator.setStart((int) mLastX, (int) mLastY);
     }
 
     private int getSelectedPosition(float x, float y) {
@@ -293,12 +295,6 @@ public class MonthWeekView extends View {
             }
         }
         return position;
-    }
-
-    public void setNewSize(int width, int height) {
-        int mode = View.MeasureSpec.getMode(mWidthSpecs);
-        int newHeightSpec = View.MeasureSpec.makeMeasureSpec(height, mode);
-        measure(mWidthSpecs, newHeightSpec);
     }
 
     @Override
@@ -324,30 +320,6 @@ public class MonthWeekView extends View {
         if (mDayCells.isEmpty()) {
             measureCells();
         }
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        Log.d(TAG, "onAttachedToWindow: ");
-        super.onAttachedToWindow();
-    }
-
-    @Override
-    protected void onFinishInflate() {
-        Log.d(TAG, "onFinishInflate: ");
-        super.onFinishInflate();
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        Log.d(TAG, "onLayout: ");
-        super.onLayout(changed, left, top, right, bottom);
-    }
-
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        Log.d(TAG, "onSizeChanged: ");
-        super.onSizeChanged(w, h, oldw, oldh);
     }
 
     public interface OnDateClickListener {

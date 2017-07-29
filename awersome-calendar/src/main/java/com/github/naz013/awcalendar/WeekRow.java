@@ -1,6 +1,7 @@
 package com.github.naz013.awcalendar;
 
 import android.graphics.Rect;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,15 +24,29 @@ import java.util.List;
 
 public class WeekRow {
 
+    private static final String TAG = "WeekRow";
+
     private List<Rect> mCells = new ArrayList<>();
     private int mOffsetY;
-    public int bottom;
-    public int left;
-    public int right;
-    public int top;
+
+    private int mBottom;
+    private int mLeft;
+    private int mRight;
+    private int mTop;
+
+    int bottom;
+    int left;
+    int right;
+    int top;
 
     public WeekRow(List<Rect> mCells) {
         this.mCells = mCells;
+        for (Rect rect : mCells) {
+            if (rect.left < mLeft) mLeft = rect.left;
+            if (rect.top < mTop) mTop = rect.top;
+            if (rect.right > mRight) mRight = rect.right;
+            if (rect.bottom > mBottom) mBottom = rect.bottom;
+        }
         setOffsetY(0);
     }
 
@@ -50,18 +65,25 @@ public class WeekRow {
     public void setOffsetY(int offsetY) {
         this.mOffsetY = offsetY;
         for (Rect rect : mCells) {
-            rect.top += mOffsetY;
-            rect.bottom += mOffsetY;
+            if (rect.top >= 0) rect.top += mOffsetY;
+            if (rect.bottom <= mBottom) rect.bottom += mOffsetY;
+            if (rect.top < 0) rect.top = 0;
+            if (rect.bottom > mBottom) rect.bottom = mBottom;
         }
         calculateDimensions();
     }
 
     private void calculateDimensions() {
+        left = 0;
+        top = 0;
+        right = 0;
+        bottom = 0;
         for (Rect rect : mCells) {
             if (rect.left < left) left = rect.left;
             if (rect.top < top) top = rect.top;
             if (rect.right > right) right = rect.right;
             if (rect.bottom > bottom) bottom = rect.bottom;
         }
+        Log.d(TAG + this, "calculateDimensions: l - " + left + ", t - " + top + ", r - " + right + ", b - " + bottom);
     }
 }

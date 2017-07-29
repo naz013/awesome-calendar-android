@@ -61,10 +61,17 @@ public class CollapseExpandAnimator extends Animator {
 
     }
 
+    public void setStart(int x, int y) {
+        this.mLastX = x;
+        this.mLastY = y;
+    }
+
     @Override
     public void animate(int x, int y) {
+        long st = System.currentTimeMillis();
         setState(STATE_ANIMATING);
-        int offset = mLastY - y;
+        int offset = y - mLastY;
+        Log.d(TAG, "animate: offset " + offset);
         int left = 0;
         int top = 0;
         int right = 0;
@@ -76,7 +83,11 @@ public class CollapseExpandAnimator extends Animator {
             if (row.right > right) right = row.right;
             if (row.bottom > bottom) bottom = row.bottom;
         }
-        mView.setNewSize(right - left, bottom - top);
+        mLastY = y;
+        int height = bottom - top;
+        Log.d(TAG, "animate: newHeight " + height);
+        mView.getLayoutParams().height = height;
+        mView.requestLayout();
         setState(STATE_IDLE);
     }
 }
