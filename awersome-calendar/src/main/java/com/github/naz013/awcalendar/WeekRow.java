@@ -64,9 +64,25 @@ public class WeekRow extends Cell {
         calculateDimensions();
     }
 
+    public int getDistanceToBottom() {
+        int offsetY = 0;
+        for (Cell cell : mCells) {
+            int dist = mBottom - cell.getBottom();
+            if (dist > offsetY) offsetY = dist;
+        }
+        return offsetY;
+    }
+
+    public int getDistanceToTop() {
+        int offsetY = 0;
+        for (Cell cell : mCells) {
+            if (cell.getTop() > offsetY) offsetY = cell.getTop();
+        }
+        return offsetY;
+    }
+
     @Override
     public void setOffsetY(int offsetY) {
-        super.setOffsetY(offsetY);
         for (DayCell dayCell : mCells) {
             dayCell.setOffsetY(offsetY);
         }

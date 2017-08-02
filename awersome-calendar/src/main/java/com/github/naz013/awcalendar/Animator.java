@@ -32,4 +32,6 @@ public abstract class Animator {
     public int getState() {
         return mState;
     }
+
+    public abstract void onDestroy();
 }

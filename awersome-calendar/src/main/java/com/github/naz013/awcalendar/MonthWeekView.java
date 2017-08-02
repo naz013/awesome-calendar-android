@@ -151,7 +151,7 @@ public class MonthWeekView extends View {
         calendar.setTimeInMillis(System.currentTimeMillis());
 
         mRealDate = new DateTime(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-                calendar.get(Calendar.DAY_OF_MONTH) + 8, 0, 0, 0, 0);
+                calendar.get(Calendar.DAY_OF_MONTH), 0, 0, 0, 0);
         DateTime mDate = mRealDate;
 
         DateTime firstDateOfMonth = mDate.getStartOfMonth();
@@ -207,7 +207,7 @@ public class MonthWeekView extends View {
             measureCells();
         }
         drawCells(canvas);
-        Log.d(TAG, "onDraw: " + (System.currentTimeMillis() - start) + ", s " + mDayCells.size());
+//        Log.d(TAG, "onDraw: " + (System.currentTimeMillis() - start) + ", s " + mDayCells.size());
     }
 
     private void drawCells(Canvas canvas) {
@@ -248,9 +248,7 @@ public class MonthWeekView extends View {
                 mWeekCells.add(new WeekRow(cells));
             }
         }
-        Log.d(TAG, "measureCells: b " + mWeekCells);
         Collections.reverse(mWeekCells);
-        Log.d(TAG, "measureCells: a " + mWeekCells);
         mAnimator.setWeeks(mWeekCells);
     }
 
@@ -336,6 +334,12 @@ public class MonthWeekView extends View {
         if (mDayCells.isEmpty()) {
             measureCells();
         }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mAnimator.onDestroy();
     }
 
     public interface OnDateClickListener {

@@ -1,5 +1,8 @@
 package com.github.naz013.awcalendar;
 
+import android.os.Handler;
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,10 +24,16 @@ import java.util.List;
 
 public class CollapseExpandAnimator extends Animator {
 
+    private static final long ANIMATION_DELAY = 13L;
+    private static final int ANIMATION_SPEED_PIXELS = 15;
+
     private static final String TAG = "CollapseExpandAnimator";
 
     public static final int STATE_EXPANDED = 2;
     public static final int STATE_COLLAPSED = 3;
+
+    private static final int ANIMATION_EXPAND = 5;
+    private static final int ANIMATION_COLLAPSE = 6;
 
     private MonthWeekView mView;
     private List<WeekRow> mWeeks = new ArrayList<>();
@@ -32,6 +41,27 @@ public class CollapseExpandAnimator extends Animator {
     private int mTargetIndex = 0;
     private int mLastX;
     private int mLastY;
+
+    private int mAnimation;
+    private int mDistance;
+    private long mDelay = ANIMATION_DELAY;
+
+    private Handler mAnimationHandler = new Handler();
+    private Runnable mAnimationRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mAnimationHandler.removeCallbacks(mAnimationRunnable);
+            mDistance -= ANIMATION_SPEED_PIXELS;
+            if (mAnimation == ANIMATION_COLLAPSE) {
+                animate(mLastX, mLastY - ANIMATION_SPEED_PIXELS);
+            } else {
+                animate(mLastX, mLastY + ANIMATION_SPEED_PIXELS);
+            }
+            if (mDistance > 0) {
+                mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
+            }
+        }
+    };
 
     public CollapseExpandAnimator(MonthWeekView view) {
         this.mView = view;
@@ -51,11 +81,33 @@ public class CollapseExpandAnimator extends Animator {
     }
 
     public void expand(int x, int y) {
-
+        setStart(x, y);
+        mDistance = 0;
+        mAnimation = ANIMATION_EXPAND;
+        for (WeekRow row : mWeeks) {
+            int dist = row.getDistanceToBottom();
+            if (dist > mDistance) mDistance = dist;
+        }
+        if (mDistance > 0) {
+            float delay = 1000f / (float) mDistance;
+            mDelay = (int) delay;
+            mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
+        }
     }
 
     public void collapse(int x, int y) {
-
+        setStart(x, y);
+        mDistance = 0;
+        mAnimation = ANIMATION_COLLAPSE;
+        for (WeekRow row : mWeeks) {
+            int dist = row.getDistanceToTop();
+            if (dist > mDistance) mDistance = dist;
+        }
+        if (mDistance > 0) {
+            float delay = 1000f / (float) mDistance;
+            mDelay = (int) delay;
+            mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
+        }
     }
 
     public void setStart(int x, int y) {
@@ -80,9 +132,15 @@ public class CollapseExpandAnimator extends Animator {
             if (row.getBottom() > bottom) bottom = row.getBottom();
         }
         mLastY = y;
-        int height = bottom - top;
-        mView.getLayoutParams().height = height;
+        mView.getLayoutParams().height = bottom - top;
         mView.requestLayout();
         setState(STATE_IDLE);
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mAnimationHandler != null) {
+            mAnimationHandler.removeCallbacks(mAnimationRunnable);
+        }
     }
 }
