@@ -1,7 +1,5 @@
 package com.github.naz013.awcalendar;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +40,6 @@ public class CollapseExpandAnimator extends Animator {
 
     public void setWeeks(List<WeekRow> weekRowList) {
         this.mWeeks = weekRowList;
-        Log.d(TAG, "setWeeks: " + weekRowList);
     }
 
     public void toggle(int x, int y) {
@@ -71,21 +68,19 @@ public class CollapseExpandAnimator extends Animator {
         long st = System.currentTimeMillis();
         setState(STATE_ANIMATING);
         int offset = y - mLastY;
-        Log.d(TAG, "animate: offset " + offset);
         int left = 0;
         int top = 0;
         int right = 0;
         int bottom = 0;
         for (WeekRow row : mWeeks) {
             row.setOffsetY(offset);
-            if (row.left < left) left = row.left;
-            if (row.top < top) top = row.top;
-            if (row.right > right) right = row.right;
-            if (row.bottom > bottom) bottom = row.bottom;
+            if (row.getLeft() < left) left = row.getLeft();
+            if (row.getTop() < top) top = row.getTop();
+            if (row.getRight() > right) right = row.getRight();
+            if (row.getBottom() > bottom) bottom = row.getBottom();
         }
         mLastY = y;
         int height = bottom - top;
-        Log.d(TAG, "animate: newHeight " + height);
         mView.getLayoutParams().height = height;
         mView.requestLayout();
         setState(STATE_IDLE);

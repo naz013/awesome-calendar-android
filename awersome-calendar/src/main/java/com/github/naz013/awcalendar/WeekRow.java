@@ -1,7 +1,6 @@
 package com.github.naz013.awcalendar;
 
-import android.graphics.Rect;
-import android.util.Log;
+import android.graphics.Canvas;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,55 +21,76 @@ import java.util.List;
  * limitations under the License.
  */
 
-public class WeekRow {
+public class WeekRow extends Cell {
 
     private static final String TAG = "WeekRow";
 
-    private List<Rect> mCells = new ArrayList<>();
-    private int mOffsetY;
+    private List<DayCell> mCells = new ArrayList<>();
 
     private int mBottom;
     private int mLeft;
     private int mRight;
     private int mTop;
 
-    int bottom;
-    int left;
-    int right;
-    int top;
+    private int bottom;
+    private int left;
+    private int right;
+    private int top;
 
-    public WeekRow(List<Rect> mCells) {
+    public WeekRow(List<DayCell> mCells) {
         this.mCells = mCells;
-        for (Rect rect : mCells) {
-            if (rect.left < mLeft) mLeft = rect.left;
-            if (rect.top < mTop) mTop = rect.top;
-            if (rect.right > mRight) mRight = rect.right;
-            if (rect.bottom > mBottom) mBottom = rect.bottom;
+        for (DayCell dayCell : mCells) {
+            if (dayCell.getLeft() < mLeft) mLeft = dayCell.getLeft();
+            if (dayCell.getTop() < mTop) mTop = dayCell.getTop();
+            if (dayCell.getRight() > mRight) mRight = dayCell.getRight();
+            if (dayCell.getBottom() > mBottom) mBottom = dayCell.getBottom();
         }
-        setOffsetY(0);
     }
 
-    public List<Rect> getCells() {
+    public List<DayCell> getCells() {
         return mCells;
     }
 
-    public void setCells(List<Rect> cells) {
+    public void setCells(List<DayCell> cells) {
         this.mCells = cells;
     }
 
-    public int getOffsetY() {
-        return mOffsetY;
-    }
-
-    public void setOffsetY(int offsetY) {
-        this.mOffsetY = offsetY;
-        for (Rect rect : mCells) {
-            if (rect.top >= 0) rect.top += mOffsetY;
-            if (rect.bottom <= mBottom) rect.bottom += mOffsetY;
-            if (rect.top < 0) rect.top = 0;
-            if (rect.bottom > mBottom) rect.bottom = mBottom;
+    @Override
+    public void setOffsetX(int offsetX) {
+        super.setOffsetX(offsetX);
+        for (DayCell dayCell : mCells) {
+            dayCell.setOffsetX(offsetX);
         }
         calculateDimensions();
+    }
+
+    @Override
+    public void setOffsetY(int offsetY) {
+        super.setOffsetY(offsetY);
+        for (DayCell dayCell : mCells) {
+            dayCell.setOffsetY(offsetY);
+        }
+        calculateDimensions();
+    }
+
+    @Override
+    public int getLeft() {
+        return left;
+    }
+
+    @Override
+    public int getTop() {
+        return top;
+    }
+
+    @Override
+    public int getRight() {
+        return right;
+    }
+
+    @Override
+    public int getBottom() {
+        return bottom;
     }
 
     private void calculateDimensions() {
@@ -78,12 +98,23 @@ public class WeekRow {
         top = 0;
         right = 0;
         bottom = 0;
-        for (Rect rect : mCells) {
-            if (rect.left < left) left = rect.left;
-            if (rect.top < top) top = rect.top;
-            if (rect.right > right) right = rect.right;
-            if (rect.bottom > bottom) bottom = rect.bottom;
+        for (DayCell dayCell : mCells) {
+            if (dayCell.getLeft() < left) left = dayCell.getLeft();
+            if (dayCell.getTop() < top) top = dayCell.getTop();
+            if (dayCell.getRight() > right) right = dayCell.getRight();
+            if (dayCell.getBottom() > bottom) bottom = dayCell.getBottom();
         }
-        Log.d(TAG + this, "calculateDimensions: l - " + left + ", t - " + top + ", r - " + right + ", b - " + bottom);
+    }
+
+    @Override
+    public void onDraw(Canvas canvas, Painter painter) {
+        for (int i = 0; i < mCells.size(); i++) {
+            mCells.get(i).onDraw(canvas, painter);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "WeekRow: " + mCells;
     }
 }

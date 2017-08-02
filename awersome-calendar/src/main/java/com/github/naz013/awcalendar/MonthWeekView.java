@@ -44,7 +44,6 @@ public class MonthWeekView extends View {
     private static final int COLS = 7;
 
     private DateTime mRealDate;
-    private DateTime mDate;
 
     private int mWidth;
     private int mHeight;
@@ -52,8 +51,7 @@ public class MonthWeekView extends View {
     private List<DateTime> mDateTimes = new ArrayList<>();
     private int mWeek = -1;
 
-    private Paint mPaint;
-    private Paint mEventsPaint;
+    private Painter mPainter;
 
     private List<Rect> mDayCells = new ArrayList<>();
     private List<WeekRow> mWeekCells = new ArrayList<>();
@@ -108,17 +106,40 @@ public class MonthWeekView extends View {
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        this.mPaint = new Paint();
-        this.mPaint.setAntiAlias(true);
-        this.mPaint.setColor(Color.BLACK);
-        this.mPaint.setStyle(Paint.Style.STROKE);
-        this.mPaint.setTextSize(30f);
-        this.mPaint.setTextAlign(Paint.Align.CENTER);
+        Paint borderPaint = new Paint();
+        borderPaint.setAntiAlias(true);
+        borderPaint.setColor(Color.BLACK);
+        borderPaint.setStyle(Paint.Style.STROKE);
 
-        this.mEventsPaint = new Paint();
-        this.mEventsPaint.setAntiAlias(true);
-        this.mEventsPaint.setColor(Color.BLACK);
-        this.mEventsPaint.setStyle(Paint.Style.FILL);
+        Paint textPaint = new Paint();
+        textPaint.setAntiAlias(true);
+        textPaint.setColor(Color.BLACK);
+        textPaint.setStyle(Paint.Style.STROKE);
+        textPaint.setTextSize(30f);
+        textPaint.setTextAlign(Paint.Align.CENTER);
+
+        Paint currentPaint = new Paint();
+        currentPaint.setAntiAlias(true);
+        currentPaint.setColor(Color.RED);
+        currentPaint.setStyle(Paint.Style.STROKE);
+        currentPaint.setTextSize(30f);
+        currentPaint.setTextAlign(Paint.Align.CENTER);
+
+        Paint bgPaint = new Paint();
+        bgPaint.setAntiAlias(true);
+        bgPaint.setColor(Color.WHITE);
+        bgPaint.setStyle(Paint.Style.FILL);
+
+        Paint eventsPaint = new Paint();
+        eventsPaint.setAntiAlias(true);
+        eventsPaint.setColor(Color.BLACK);
+        eventsPaint.setStyle(Paint.Style.FILL);
+
+        mPainter = new Painter(textPaint);
+        mPainter.setBackgroundPaint(bgPaint);
+        mPainter.setBorderPaint(borderPaint);
+        mPainter.setEventPaint(eventsPaint);
+        mPainter.setCurrentDayPaint(currentPaint);
 
         mAnimator = new CollapseExpandAnimator(this);
 
@@ -129,9 +150,9 @@ public class MonthWeekView extends View {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
 
-        mRealDate = new DateTime(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH), 12, 0, 0, 0);
-        mDate = mRealDate;
+        mRealDate = new DateTime(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
+                calendar.get(Calendar.DAY_OF_MONTH) + 8, 0, 0, 0, 0);
+        DateTime mDate = mRealDate;
 
         DateTime firstDateOfMonth = mDate.getStartOfMonth();
         DateTime lastDateOfMonth = mDate.getEndOfMonth();
@@ -172,12 +193,13 @@ public class MonthWeekView extends View {
         for (int i = 1; i <= numOfDays; i++) {
             mDateTimes.add(lastDateTime.plusDays(i));
         }
-        Log.d(TAG, "calculateCalendar: " + mDateTimes);
+        Log.d(TAG, "calculateCalendar: " + mRealDate + ", array " + mDateTimes);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        canvas.drawColor(mPainter.getBackgroundPaint().getColor());
         long start = System.currentTimeMillis();
         this.mWidth = getWidth();
         this.mHeight = getHeight();
@@ -185,23 +207,14 @@ public class MonthWeekView extends View {
             measureCells();
         }
         drawCells(canvas);
-        Log.d(TAG, "onDraw: " + (System.currentTimeMillis() - start));
+        Log.d(TAG, "onDraw: " + (System.currentTimeMillis() - start) + ", s " + mDayCells.size());
     }
 
     private void drawCells(Canvas canvas) {
-        for (int i = 0; i < mDayCells.size(); i++) {
-            Rect cell = mDayCells.get(i);
-            canvas.drawRect(cell, mPaint);
-            int day = mDateTimes.get(i).getDay();
-            drawRectText("" + day, canvas, cell);
+        for (int i = 0; i < mWeekCells.size(); i++) {
+            Cell cell = mWeekCells.get(i);
+            cell.onDraw(canvas, mPainter);
         }
-    }
-
-    private void drawRectText(String text, Canvas canvas, Rect r) {
-        int width = r.width();
-        int numOfChars = mPaint.breakText(text, true, width, null);
-        int start = (text.length() - numOfChars) / 2;
-        canvas.drawText(text, start, start + numOfChars, r.centerX(), r.centerY(), mPaint);
     }
 
     private void measureCells() {
@@ -216,16 +229,18 @@ public class MonthWeekView extends View {
         mWeekCells.clear();
         int c = 0;
         for (int i = 0; i < ROWS; i++) {
-            List<Rect> cells = new ArrayList<>();
+            List<DayCell> cells = new ArrayList<>();
             for (int j = 0; j < COLS; j++) {
                 int top = i * cellHeight;
                 int left = j * cellWidth;
                 Rect tmp = new Rect(left, top, left + cellWidth, top + cellHeight);
-                mDayCells.add(tmp);
-                cells.add(tmp);
-                if (mDateTimes.get(c).isSameDayAs(mDate)) {
+                DayCell dayCell = new DayCell(tmp, mDateTimes.get(i * 7 + j));
+                if (dayCell.getDateTime().isSameDayAs(mRealDate)) {
+                    dayCell.setCurrent(true);
                     mWeek = i;
                 }
+                mDayCells.add(tmp);
+                cells.add(dayCell);
             }
             if (mWeek == i) {
                 mWeekCells.add(0, new WeekRow(cells));
@@ -233,7 +248,9 @@ public class MonthWeekView extends View {
                 mWeekCells.add(new WeekRow(cells));
             }
         }
+        Log.d(TAG, "measureCells: b " + mWeekCells);
         Collections.reverse(mWeekCells);
+        Log.d(TAG, "measureCells: a " + mWeekCells);
         mAnimator.setWeeks(mWeekCells);
     }
 
@@ -301,7 +318,6 @@ public class MonthWeekView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         mWidthSpecs = widthMeasureSpec;
         mHeightSpecs = heightMeasureSpec;
-        Log.d(TAG, "onMeasure: ");
         if (mAnimator.getState() == CollapseExpandAnimator.STATE_EXPANDED) {
             int widthPixels = View.MeasureSpec.getSize(widthMeasureSpec);
             int widthMode = View.MeasureSpec.getMode(widthMeasureSpec);
