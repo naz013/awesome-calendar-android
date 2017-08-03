@@ -5,6 +5,8 @@ import android.graphics.Canvas;
 import java.util.ArrayList;
 import java.util.List;
 
+import hirondelle.date4j.DateTime;
+
 /**
  * Copyright 2017 Nazar Suhovich
  * <p/>
@@ -21,7 +23,7 @@ import java.util.List;
  * limitations under the License.
  */
 
-public class WeekRow extends Cell {
+class WeekRow extends ContainerCell {
 
     private static final String TAG = "WeekRow";
 
@@ -37,7 +39,7 @@ public class WeekRow extends Cell {
     private int right;
     private int top;
 
-    public WeekRow(List<DayCell> mCells) {
+    WeekRow(List<DayCell> mCells) {
         this.mCells = mCells;
         for (DayCell dayCell : mCells) {
             if (dayCell.getLeft() < mLeft) mLeft = dayCell.getLeft();
@@ -57,14 +59,13 @@ public class WeekRow extends Cell {
 
     @Override
     public void setOffsetX(int offsetX) {
-        super.setOffsetX(offsetX);
         for (DayCell dayCell : mCells) {
             dayCell.setOffsetX(offsetX);
         }
         calculateDimensions();
     }
 
-    public int getDistanceToBottom() {
+    int getDistanceToBottom() {
         int offsetY = 0;
         for (Cell cell : mCells) {
             int dist = mBottom - cell.getBottom();
@@ -73,7 +74,7 @@ public class WeekRow extends Cell {
         return offsetY;
     }
 
-    public int getDistanceToTop() {
+    int getDistanceToTop() {
         int offsetY = 0;
         for (Cell cell : mCells) {
             if (cell.getTop() > offsetY) offsetY = cell.getTop();
@@ -127,6 +128,40 @@ public class WeekRow extends Cell {
         for (int i = 0; i < mCells.size(); i++) {
             mCells.get(i).onDraw(canvas, painter);
         }
+    }
+
+    @Override
+    public boolean contains(DayCell cell) {
+        for (DayCell dayCell : mCells) {
+            if (dayCell.getDateTime().isSameDayAs(cell.getDateTime())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public DateTime get(int x, int y) {
+        for (DayCell cell : mCells) {
+            DateTime dateTime = cell.get(x, y);
+            if (dateTime != null) return dateTime;
+        }
+        return null;
+    }
+
+    @Override
+    public DateTime getMiddle() {
+        return mCells.get(mCells.size() / 2).getDateTime();
+    }
+
+    @Override
+    public DateTime getTail() {
+        return mCells.get(mCells.size() - 1).getDateTime();
+    }
+
+    @Override
+    public DateTime getHead() {
+        return mCells.get(0).getDateTime();
     }
 
     @Override

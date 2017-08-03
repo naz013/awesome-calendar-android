@@ -2,7 +2,6 @@ package com.github.naz013.awcalendar;
 
 import android.graphics.Canvas;
 import android.os.Handler;
-import android.util.Log;
 
 import hirondelle.date4j.DateTime;
 
@@ -22,30 +21,33 @@ import hirondelle.date4j.DateTime;
  * limitations under the License.
  */
 
-class CollapseExpandAnimator extends Animator {
+class PageSlideAnimator extends Animator {
+
+    private static final int STATE_IDLE = 0;
+    static final int STATE_SLIDE_RIGHT = 1;
+    static final int STATE_SLIDE_LEFT = 2;
 
     private static final long ANIMATION_DELAY = 13L;
     private static final int ANIMATION_SPEED_PIXELS = 15;
 
-    private static final String TAG = "CollapseExpandAnimator";
+    private static final String TAG = "PageSlideAnimator";
 
-    static final int STATE_EXPANDED = 2;
-    static final int STATE_COLLAPSED = 3;
+    private static final int ANIMATION_RIGHT = 5;
+    private static final int ANIMATION_LEFT = 6;
 
-    private static final int ANIMATION_EXPAND = 5;
-    private static final int ANIMATION_COLLAPSE = 6;
-
-    private MonthWeekView mView;
-    private MonthCell mCell;
+    private ContainerCell mPrevCell;
+    private ContainerCell mCurrentCell;
+    private ContainerCell mNextCell;
 
     private int mLastX;
     private int mLastY;
+    private MonthWeekView mView;
 
     private int mAnimation;
     private int mDistance;
     private long mDelay = ANIMATION_DELAY;
 
-    private int mState = STATE_EXPANDED;
+    private int mState;
     private OnStateListener mOnStateListener;
 
     private Handler mAnimationHandler = new Handler();
@@ -54,7 +56,7 @@ class CollapseExpandAnimator extends Animator {
         public void run() {
             mAnimationHandler.removeCallbacks(mAnimationRunnable);
             mDistance -= ANIMATION_SPEED_PIXELS;
-            if (mAnimation == ANIMATION_COLLAPSE) {
+            if (mAnimation == ANIMATION_LEFT) {
                 animate(mLastX, mLastY - ANIMATION_SPEED_PIXELS);
             } else {
                 animate(mLastX, mLastY + ANIMATION_SPEED_PIXELS);
@@ -62,55 +64,59 @@ class CollapseExpandAnimator extends Animator {
             if (mDistance > 0) {
                 mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
             } else {
-                if (mAnimation == ANIMATION_COLLAPSE) {
-                    setState(STATE_COLLAPSED);
+                if (mAnimation == ANIMATION_LEFT) {
+                    setState(STATE_SLIDE_LEFT);
                 } else {
-                    setState(STATE_EXPANDED);
+                    setState(STATE_SLIDE_RIGHT);
                 }
             }
         }
     };
 
-    CollapseExpandAnimator(MonthWeekView view) {
-        this.mView = view;
-        setState(STATE_EXPANDED);
+    PageSlideAnimator(MonthWeekView monthWeekView) {
+        this.mView = monthWeekView;
+        setState(STATE_IDLE);
     }
 
-    void setCell(MonthCell cell) {
-        this.mCell = cell;
+    ContainerCell getCurrent() {
+        return mCurrentCell;
     }
 
-    public void toggle(int x, int y) {
-        if (getState() == STATE_COLLAPSED) {
-            expand(x, y);
-        } else {
-            collapse(x, y);
-        }
+    ContainerCell getPrevious() {
+        return mPrevCell;
     }
 
-    private void expand(int x, int y) {
-        start(x, y);
-        mDistance = mCell.getExpandDistance();
-        mAnimation = ANIMATION_EXPAND;
-        Log.d(TAG, "expand: " + mDistance);
-        if (mDistance > 0) {
-            float delay = 1000f / (float) mDistance;
-            mDelay = (int) delay;
-            mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
-        }
+    ContainerCell getNext() {
+        return mNextCell;
     }
 
-    private void collapse(int x, int y) {
-        start(x, y);
-        mDistance = mCell.getCollapseDistance();
-        mAnimation = ANIMATION_COLLAPSE;
-        Log.d(TAG, "collapse: " + mDistance);
-        if (mDistance > 0) {
-            float delay = 1000f / (float) mDistance;
-            mDelay = (int) delay;
-            mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
-        }
+    void setCells(ContainerCell prevCell, ContainerCell currentCell, ContainerCell nextCell) {
+        this.mPrevCell = prevCell;
+        this.mCurrentCell = currentCell;
+        this.mNextCell = nextCell;
     }
+
+//    private void expand(int x, int y) {
+//        start(x, y);
+//        mDistance = mCell.getExpandDistance();
+//        mAnimation = ANIMATION_RIGHT;
+//        if (mDistance > 0) {
+//            float delay = 1000f / (float) mDistance;
+//            mDelay = (int) delay;
+//            mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
+//        }
+//    }
+//
+//    private void collapse(int x, int y) {
+//        start(x, y);
+//        mDistance = mCell.getCollapseDistance();
+//        mAnimation = ANIMATION_LEFT;
+//        if (mDistance > 0) {
+//            float delay = 1000f / (float) mDistance;
+//            mDelay = (int) delay;
+//            mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
+//        }
+//    }
 
     @Override
     public void start(int x, int y) {
@@ -120,23 +126,22 @@ class CollapseExpandAnimator extends Animator {
 
     @Override
     public void finishAnimation(int x, int y) {
-        if (y - mLastY > 0) {
-            expand(x, y);
-        } else {
-            collapse(x, y);
-        }
+//        if (y - mLastY > 0) {
+//            expand(x, y);
+//        } else {
+//            collapse(x, y);
+//        }
     }
 
     @Override
     public void animate(int x, int y) {
         long st = System.currentTimeMillis();
-        int offset = y - mLastY;
-        mCell.setOffsetY(offset);
-        mLastY = y;
-        int h = mCell.getBottom() - mCell.getTop();
-        mView.getLayoutParams().height = h;
-        Log.d(TAG, "animate: " + offset + ", h " + h);
-        if (offset != 0) mView.requestLayout();
+        int offset = x - mLastX;
+        mPrevCell.setOffsetX(offset);
+        mCurrentCell.setOffsetX(offset);
+        mNextCell.setOffsetX(offset);
+        mLastX = x;
+        mView.invalidate();
     }
 
     @Override
@@ -146,14 +151,14 @@ class CollapseExpandAnimator extends Animator {
         }
     }
 
-    void setState(int state) {
+    private void setState(int state) {
         this.mState = state;
         if (mOnStateListener != null) {
             mOnStateListener.onStateChanged(state);
         }
     }
 
-    int getState() {
+    public int getState() {
         return mState;
     }
 
@@ -167,20 +172,22 @@ class CollapseExpandAnimator extends Animator {
 
     @Override
     public void onDraw(Canvas canvas, Painter painter) {
-        mCell.onDraw(canvas, painter);
+        mPrevCell.onDraw(canvas, painter);
+        mNextCell.onDraw(canvas, painter);
+        mCurrentCell.onDraw(canvas, painter);
     }
 
     @Override
     public DateTime getClicked(int x, int y) {
-        return mCell.get(x, y);
+        return mCurrentCell.get(x, y);
     }
 
     @Override
     public boolean isEmpty() {
-        return mCell == null;
+        return mPrevCell == null || mCurrentCell == null || mNextCell == null;
     }
 
-    interface OnStateListener {
+    public interface OnStateListener {
         void onStateChanged(int state);
     }
 }

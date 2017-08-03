@@ -18,7 +18,7 @@ import android.graphics.Paint;
  * limitations under the License.
  */
 
-public class Painter {
+class Painter {
 
     private Paint borderPaint;
     private Paint backgroundPaint;
@@ -26,35 +26,35 @@ public class Painter {
     private Paint eventPaint;
     private Paint currentDayPaint;
 
-    public Painter(Paint textPaint) {
+    Painter(Paint textPaint) {
         this.textPaint = textPaint;
     }
 
-    public Paint getCurrentDayPaint() {
+    Paint getCurrentDayPaint() {
         return currentDayPaint;
     }
 
-    public void setCurrentDayPaint(Paint currentDayPaint) {
+    void setCurrentDayPaint(Paint currentDayPaint) {
         this.currentDayPaint = currentDayPaint;
     }
 
-    public Paint getBorderPaint() {
+    Paint getBorderPaint() {
         return borderPaint;
     }
 
-    public void setBorderPaint(Paint borderPaint) {
+    void setBorderPaint(Paint borderPaint) {
         this.borderPaint = borderPaint;
     }
 
-    public Paint getBackgroundPaint() {
+    Paint getBackgroundPaint() {
         return backgroundPaint;
     }
 
-    public void setBackgroundPaint(Paint backgroundPaint) {
+    void setBackgroundPaint(Paint backgroundPaint) {
         this.backgroundPaint = backgroundPaint;
     }
 
-    public Paint getTextPaint() {
+    Paint getTextPaint() {
         return textPaint;
     }
 
@@ -66,7 +66,7 @@ public class Painter {
         return eventPaint;
     }
 
-    public void setEventPaint(Paint eventPaint) {
+    void setEventPaint(Paint eventPaint) {
         this.eventPaint = eventPaint;
     }
 }

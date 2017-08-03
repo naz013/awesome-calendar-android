@@ -1,5 +1,7 @@
 package com.github.naz013.awcalendar;
 
+import hirondelle.date4j.DateTime;
+
 /**
  * Copyright 2017 Nazar Suhovich
  * <p/>
@@ -16,22 +18,17 @@ package com.github.naz013.awcalendar;
  * limitations under the License.
  */
 
-public abstract class Animator {
+abstract class Animator implements PaintInterface {
 
-    public static final int STATE_IDLE = 0;
-    public static final int STATE_ANIMATING = 1;
-
-    private int mState = STATE_IDLE;
+    public abstract void start(int x, int y);
 
     public abstract void animate(int x, int y);
 
-    public void setState(int state) {
-        this.mState = state;
-    }
-
-    public int getState() {
-        return mState;
-    }
+    public abstract void finishAnimation(int x, int y);
 
     public abstract void onDestroy();
+
+    public abstract DateTime getClicked(int x, int y);
+
+    public abstract boolean isEmpty();
 }

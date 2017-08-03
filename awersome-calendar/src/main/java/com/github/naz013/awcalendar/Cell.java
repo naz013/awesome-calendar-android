@@ -1,5 +1,7 @@
 package com.github.naz013.awcalendar;
 
+import hirondelle.date4j.DateTime;
+
 /**
  * Copyright 2017 Nazar Suhovich
  * <p/>
@@ -16,7 +18,7 @@ package com.github.naz013.awcalendar;
  * limitations under the License.
  */
 
-public abstract class Cell implements PaintInterface {
+abstract class Cell implements PaintInterface {
 
     private int offsetX;
     private int offsetY;
@@ -29,7 +31,7 @@ public abstract class Cell implements PaintInterface {
         this.offsetX = offsetX;
     }
 
-    public int getOffsetY() {
+    int getOffsetY() {
         return offsetY;
     }
 
@@ -44,4 +46,6 @@ public abstract class Cell implements PaintInterface {
     public abstract int getRight();
 
     public abstract int getBottom();
+
+    public abstract DateTime get(int x, int y);
 }

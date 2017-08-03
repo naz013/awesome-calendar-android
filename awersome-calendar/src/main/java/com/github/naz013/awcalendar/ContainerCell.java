@@ -1,6 +1,6 @@
 package com.github.naz013.awcalendar;
 
-import android.graphics.Canvas;
+import hirondelle.date4j.DateTime;
 
 /**
  * Copyright 2017 Nazar Suhovich
@@ -18,6 +18,13 @@ import android.graphics.Canvas;
  * limitations under the License.
  */
 
-interface PaintInterface {
-    void onDraw(Canvas canvas, Painter painter);
+abstract class ContainerCell extends Cell {
+
+    public abstract boolean contains(DayCell cell);
+
+    public abstract DateTime getMiddle();
+
+    public abstract DateTime getHead();
+
+    public abstract DateTime getTail();
 }

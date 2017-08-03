@@ -22,7 +22,7 @@ import hirondelle.date4j.DateTime;
  * limitations under the License.
  */
 
-public class DayCell extends Cell {
+class DayCell extends Cell {
 
     private Rect rect;
     private DateTime dateTime;
@@ -34,14 +34,14 @@ public class DayCell extends Cell {
 
     private boolean isCurrent;
 
-    public DayCell(Rect rect, DateTime dateTime) {
+    DayCell(Rect rect, DateTime dateTime) {
         this.rect = rect;
         this.dateTime = dateTime;
         extractInitValues();
         setOffsetY(0);
     }
 
-    public void setCurrent(boolean current) {
+    void setCurrent(boolean current) {
         isCurrent = current;
     }
 
@@ -100,7 +100,7 @@ public class DayCell extends Cell {
         else if (rect.bottom < mBottom - mTop) rect.bottom = mBottom - mTop;
     }
 
-    public DateTime getDateTime() {
+    DateTime getDateTime() {
         return dateTime;
     }
 
@@ -122,6 +122,14 @@ public class DayCell extends Cell {
         int numOfChars = paint.breakText(text, true, width, null);
         int start = (text.length() - numOfChars) / 2;
         canvas.drawText(text, start, start + numOfChars, r.exactCenterX(), r.exactCenterY(), paint);
+    }
+
+    @Override
+    public DateTime get(int x, int y) {
+        if (x >= mLeft && x < mRight && y >= mTop && y < mBottom) {
+            return dateTime;
+        }
+        return null;
     }
 
     @Override

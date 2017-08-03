@@ -6,7 +6,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -14,10 +13,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
 
 import hirondelle.date4j.DateTime;
 
@@ -37,36 +33,30 @@ import hirondelle.date4j.DateTime;
  * limitations under the License.
  */
 
-public class MonthWeekView extends View {
+public class MonthWeekView extends View implements PageSlideAnimator.OnStateListener,
+        CollapseExpandAnimator.OnStateListener {
 
     private static final String TAG = "git.MonthWeekView";
-    private static final int ROWS = 6;
-    private static final int COLS = 7;
 
     private DateTime mRealDate;
 
     private int mWidth;
     private int mHeight;
 
-    private List<DateTime> mDateTimes = new ArrayList<>();
-    private int mWeek = -1;
-
     private Painter mPainter;
-
-    private List<Rect> mDayCells = new ArrayList<>();
-    private List<WeekRow> mWeekCells = new ArrayList<>();
 
     private int mLastEvent;
     private float mLastX;
     private float mLastY;
+    private float mTarget;
 
-    private CollapseExpandAnimator mAnimator;
+    private Animator mAnimator;
+    private boolean mTouchAnimator;
+    private CollapseExpandAnimator mColExpAnimator;
+    private PageSlideAnimator mSlideAnimator;
 
     private OnDateClickListener mDateClickListener;
     private OnDateLongClickListener mDateLongClickListener;
-
-    private int mWidthSpecs;
-    private int mHeightSpecs;
 
     public MonthWeekView(Context context) {
         super(context);
@@ -141,115 +131,87 @@ public class MonthWeekView extends View {
         mPainter.setEventPaint(eventsPaint);
         mPainter.setCurrentDayPaint(currentPaint);
 
-        mAnimator = new CollapseExpandAnimator(this);
+        mColExpAnimator = new CollapseExpandAnimator(this);
+        mColExpAnimator.setOnStateListener(this);
+        mSlideAnimator = new PageSlideAnimator(this);
+        mSlideAnimator.setOnStateListener(this);
 
-        calculateCalendar();
-    }
+        mAnimator = mColExpAnimator;
 
-    private void calculateCalendar() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
 
         mRealDate = new DateTime(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
                 calendar.get(Calendar.DAY_OF_MONTH), 0, 0, 0, 0);
-        DateTime mDate = mRealDate;
+    }
 
-        DateTime firstDateOfMonth = mDate.getStartOfMonth();
-        DateTime lastDateOfMonth = mDate.getEndOfMonth();
-        int weekdayOfFirstDate = firstDateOfMonth.getWeekDay();
-        int startDayOfWeek = 2;
-        if (weekdayOfFirstDate < startDayOfWeek) {
-            weekdayOfFirstDate += 7;
+    private void calculateCalendar(int slide) {
+        if (mWidth == 0 || mHeight == 0) {
+            return;
         }
-        while (weekdayOfFirstDate > 0) {
-            DateTime dateTime = firstDateOfMonth.minusDays(weekdayOfFirstDate - startDayOfWeek);
-            if (!dateTime.lt(firstDateOfMonth)) {
-                break;
-            }
-            mDateTimes.add(dateTime);
-            weekdayOfFirstDate--;
-        }
-        for (int i = 0; i < lastDateOfMonth.getDay() - 1; i++) {
-            mDateTimes.add(firstDateOfMonth.plusDays(i));
-        }
-        int endDayOfWeek = startDayOfWeek - 1;
-        if (endDayOfWeek == 0) {
-            endDayOfWeek = 7;
-        }
-        if (lastDateOfMonth.getWeekDay() != endDayOfWeek) {
-            int i = 1;
-            while (true) {
-                DateTime nextDay = lastDateOfMonth.plusDays(i);
-                mDateTimes.add(nextDay);
-                i++;
-                if (nextDay.getWeekDay() == endDayOfWeek) {
-                    break;
+        if (mSlideAnimator.isEmpty()) {
+            MonthCell currentMonth = CellFactory.getMonth(mRealDate, mRealDate, mWidth, mHeight, 0);
+            MonthCell prevMonth = CellFactory.getMonth(mRealDate, shiftMonth(mRealDate, -1), mWidth, mHeight, -1);
+            MonthCell nextMonth = CellFactory.getMonth(mRealDate, shiftMonth(mRealDate, 1), mWidth, mHeight, 1);
+            mColExpAnimator.setCell(currentMonth);
+            mSlideAnimator.setCells(prevMonth, currentMonth, nextMonth);
+        } else {
+            ContainerCell prev = mSlideAnimator.getPrevious();
+            ContainerCell current = mSlideAnimator.getCurrent();
+            ContainerCell next = mSlideAnimator.getNext();
+            boolean isExpanded = mColExpAnimator.getState() == CollapseExpandAnimator.STATE_EXPANDED;
+            if (slide == 0) {
+                if (isExpanded) {
+                    prev = CellFactory.getMonth(mRealDate, shiftMonth(current.getMiddle(), -1), mWidth, mHeight, -1);
+                    current = CellFactory.getMonth(mRealDate, current.getMiddle(), mWidth, mHeight, 0);
+                    next = CellFactory.getMonth(mRealDate, shiftMonth(current.getMiddle(), 1), mWidth, mHeight, 1);
+                } else {
+                    current = CellFactory.getWeek(mRealDate, current.getTail(), mWidth, mHeight, 0);
+                    prev = CellFactory.getWeek(mRealDate, current.getHead().minusDays(7), mWidth, mHeight, -1);
+                    next = CellFactory.getWeek(mRealDate, current.getHead().plusDays(7), mWidth, mHeight, 1);
+                }
+            } else {
+                if (slide > 0) {
+                    next = current;
+                    current = prev;
+                    if (isExpanded) {
+                        prev = CellFactory.getMonth(mRealDate, shiftMonth(current.getMiddle(), -1), mWidth, mHeight, -1);
+                    } else {
+                        prev = CellFactory.getWeek(mRealDate, current.getHead().minusDays(7), mWidth, mHeight, -1);
+                    }
+                } else if (slide < 0) {
+                    prev = current;
+                    current = next;
+                    if (isExpanded) {
+                        next = CellFactory.getMonth(mRealDate, shiftMonth(current.getMiddle(), 1), mWidth, mHeight, 1);
+                    } else {
+                        next = CellFactory.getWeek(mRealDate, current.getHead().plusDays(7), mWidth, mHeight, 1);
+                    }
                 }
             }
+            mSlideAnimator.setCells(prev, current, next);
+            mColExpAnimator.setCell(CellFactory.getMonth(mRealDate, current.getMiddle(), mWidth, mHeight, 0));
         }
-        int size = mDateTimes.size();
-        int numOfDays = 42 - size;
-        DateTime lastDateTime = mDateTimes.get(size - 1);
-        for (int i = 1; i <= numOfDays; i++) {
-            mDateTimes.add(lastDateTime.plusDays(i));
+    }
+
+    private DateTime shiftMonth(DateTime dateTime, int offset) {
+        if (offset > 0) {
+            return dateTime.plusDays(30);
+        }else {
+            return dateTime.minusDays(30);
         }
-        Log.d(TAG, "calculateCalendar: " + mRealDate + ", array " + mDateTimes);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawColor(mPainter.getBackgroundPaint().getColor());
-        long start = System.currentTimeMillis();
         this.mWidth = getWidth();
         this.mHeight = getHeight();
-        if (mDayCells.isEmpty()) {
-            measureCells();
+        if (mAnimator.isEmpty()) {
+            calculateCalendar(0);
         }
-        drawCells(canvas);
-//        Log.d(TAG, "onDraw: " + (System.currentTimeMillis() - start) + ", s " + mDayCells.size());
-    }
-
-    private void drawCells(Canvas canvas) {
-        for (int i = 0; i < mWeekCells.size(); i++) {
-            Cell cell = mWeekCells.get(i);
-            cell.onDraw(canvas, mPainter);
-        }
-    }
-
-    private void measureCells() {
-        int w = getWidth();
-        int h = getHeight();
-        if (w == 0 && h == 0) {
-            return;
-        }
-        int cellWidth = w / COLS;
-        int cellHeight = h / ROWS;
-        mDayCells.clear();
-        mWeekCells.clear();
-        int c = 0;
-        for (int i = 0; i < ROWS; i++) {
-            List<DayCell> cells = new ArrayList<>();
-            for (int j = 0; j < COLS; j++) {
-                int top = i * cellHeight;
-                int left = j * cellWidth;
-                Rect tmp = new Rect(left, top, left + cellWidth, top + cellHeight);
-                DayCell dayCell = new DayCell(tmp, mDateTimes.get(i * 7 + j));
-                if (dayCell.getDateTime().isSameDayAs(mRealDate)) {
-                    dayCell.setCurrent(true);
-                    mWeek = i;
-                }
-                mDayCells.add(tmp);
-                cells.add(dayCell);
-            }
-            if (mWeek == i) {
-                mWeekCells.add(0, new WeekRow(cells));
-            } else {
-                mWeekCells.add(new WeekRow(cells));
-            }
-        }
-        Collections.reverse(mWeekCells);
-        mAnimator.setWeeks(mWeekCells);
+        mAnimator.onDraw(canvas, mPainter);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -270,27 +232,36 @@ public class MonthWeekView extends View {
     }
 
     private void processMove(MotionEvent event) {
+        if (!mTouchAnimator) {
+//            if (Math.abs(mLastX - event.getX()) > Math.abs(mLastY - event.getY())) {
+//                mAnimator = mSlideAnimator;
+//            } else {
+                mAnimator = mColExpAnimator;
+//            }
+            mAnimator.start((int) mLastX, (int) mLastY);
+            mTouchAnimator = true;
+        }
+        if (mAnimator instanceof CollapseExpandAnimator) {
+
+        }
         mAnimator.animate((int) event.getX(), (int) event.getY());
         mLastEvent = event.getAction();
     }
 
     private boolean processUp(MotionEvent event) {
         if (mLastEvent == MotionEvent.ACTION_DOWN) {
-            int touchedPosition = getSelectedPosition(mLastX, mLastY);
-            int releasedPosition = getSelectedPosition(event.getX(), event.getY());
-            if (touchedPosition != -1 && releasedPosition != -1 && touchedPosition == releasedPosition) {
+            DateTime touchedPosition = getSelectedPosition(mLastX, mLastY);
+            DateTime releasedPosition = getSelectedPosition(event.getX(), event.getY());
+            if (touchedPosition != null && releasedPosition != null && touchedPosition.isSameDayAs(releasedPosition)) {
                 if (mDateClickListener != null) {
-                    mDateClickListener.onDateClicked(mDateTimes.get(releasedPosition));
+                    mDateClickListener.onDateClicked(releasedPosition);
                 }
                 return super.performClick();
             }
         } else if (mLastEvent == MotionEvent.ACTION_MOVE) {
-            if (event.getY() - mLastY > 0) {
-                mAnimator.expand((int) event.getX(), (int) event.getY());
-            } else {
-                mAnimator.collapse((int) event.getX(), (int) event.getY());
-            }
+            mAnimator.finishAnimation((int) event.getX(), (int) event.getY());
         }
+        mTouchAnimator = false;
         return false;
     }
 
@@ -298,31 +269,21 @@ public class MonthWeekView extends View {
         mLastX = event.getX();
         mLastY = event.getY();
         mLastEvent = event.getAction();
-        mAnimator.setStart((int) mLastX, (int) mLastY);
     }
 
-    private int getSelectedPosition(float x, float y) {
-        int position = -1;
-        for (int i = 0; i < mDayCells.size(); i++) {
-            if (mDayCells.get(i).contains((int) x, (int) y)) {
-                position = i;
-                break;
-            }
-        }
-        return position;
+    private DateTime getSelectedPosition(float x, float y) {
+        return mAnimator.getClicked((int) x, (int) y);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        mWidthSpecs = widthMeasureSpec;
-        mHeightSpecs = heightMeasureSpec;
-        if (mAnimator.getState() == CollapseExpandAnimator.STATE_EXPANDED) {
+        if (mColExpAnimator.getState() == CollapseExpandAnimator.STATE_EXPANDED) {
             int widthPixels = View.MeasureSpec.getSize(widthMeasureSpec);
             int widthMode = View.MeasureSpec.getMode(widthMeasureSpec);
             int height = widthPixels / 7 * 6;
             int newHeightSpec = View.MeasureSpec.makeMeasureSpec(height, widthMode);
             super.onMeasure(widthMeasureSpec, newHeightSpec);
-        } else if (mAnimator.getState() == CollapseExpandAnimator.STATE_COLLAPSED) {
+        } else if (mColExpAnimator.getState() == CollapseExpandAnimator.STATE_COLLAPSED) {
             int widthPixels = View.MeasureSpec.getSize(widthMeasureSpec);
             int widthMode = View.MeasureSpec.getMode(widthMeasureSpec);
             int height = widthPixels / 7;
@@ -331,15 +292,24 @@ public class MonthWeekView extends View {
         } else {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
-        if (mDayCells.isEmpty()) {
-            measureCells();
-        }
+        Log.d(TAG, "onMeasure: ");
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mAnimator.onDestroy();
+        mColExpAnimator.onDestroy();
+    }
+
+    @Override
+    public void onStateChanged(int state) {
+        if (state == PageSlideAnimator.STATE_SLIDE_LEFT) {
+            calculateCalendar(-1);
+        } else if (state == PageSlideAnimator.STATE_SLIDE_RIGHT) {
+            calculateCalendar(1);
+        } else {
+            calculateCalendar(0);
+        }
     }
 
     public interface OnDateClickListener {
