@@ -26,7 +26,7 @@ abstract class Animator implements PaintInterface {
 
     public abstract void finishAnimation(int x, int y);
 
-    public abstract void onDestroy();
+    public abstract void cancelAnimation();
 
     public abstract DateTime getClicked(int x, int y);
 

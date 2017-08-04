@@ -1,6 +1,7 @@
 package com.github.naz013.awcalendar;
 
 import android.graphics.Canvas;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +77,9 @@ class MonthCell extends ContainerCell {
 
     @Override
     public void onDraw(Canvas canvas, Painter painter) {
-        for (WeekRow row : mWeeks) row.onDraw(canvas, painter);
+        for (WeekRow row : mWeeks) {
+            row.onDraw(canvas, painter);
+        }
     }
 
     @Override
@@ -100,11 +103,13 @@ class MonthCell extends ContainerCell {
     }
 
     private void calculateDimensions() {
-        left = 0;
-        top = 0;
-        right = 0;
-        bottom = 0;
-        for (Cell cell : mWeeks) {
+        WeekRow zero = mWeeks.get(0);
+        left = zero.getLeft();
+        top = zero.getTop();
+        right = zero.getRight();
+        bottom = zero.getBottom();
+        for (int i = 1; i < mWeeks.size(); i++) {
+            WeekRow cell = mWeeks.get(i);
             if (cell.getLeft() < left) left = cell.getLeft();
             if (cell.getTop() < top) top = cell.getTop();
             if (cell.getRight() > right) right = cell.getRight();
@@ -144,5 +149,14 @@ class MonthCell extends ContainerCell {
     @Override
     public DateTime getTail() {
         return mWeeks.get(mWeeks.size() - 1).getHead();
+    }
+
+    @Override
+    public String toString() {
+        return "[MonthCell: {l - " + left +
+                ", t - " + top +
+                ", r - " + right +
+                ", b - " + bottom +
+                ", cells - " + mWeeks + "}]";
     }
 }

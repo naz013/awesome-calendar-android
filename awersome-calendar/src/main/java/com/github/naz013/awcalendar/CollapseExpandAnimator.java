@@ -76,8 +76,13 @@ class CollapseExpandAnimator extends Animator {
         setState(STATE_EXPANDED);
     }
 
+    MonthCell getCell() {
+        return mCell;
+    }
+
     void setCell(MonthCell cell) {
         this.mCell = cell;
+        Log.d(TAG, "setCell: " + cell);
     }
 
     public void toggle(int x, int y) {
@@ -129,18 +134,15 @@ class CollapseExpandAnimator extends Animator {
 
     @Override
     public void animate(int x, int y) {
-        long st = System.currentTimeMillis();
         int offset = y - mLastY;
         mCell.setOffsetY(offset);
         mLastY = y;
-        int h = mCell.getBottom() - mCell.getTop();
-        mView.getLayoutParams().height = h;
-        Log.d(TAG, "animate: " + offset + ", h " + h);
-        if (offset != 0) mView.requestLayout();
+        mView.getLayoutParams().height = mCell.getBottom() - mCell.getTop();
+        mView.requestLayout();
     }
 
     @Override
-    public void onDestroy() {
+    public void cancelAnimation() {
         if (mAnimationHandler != null) {
             mAnimationHandler.removeCallbacks(mAnimationRunnable);
         }

@@ -81,7 +81,7 @@ class DayCell extends Cell {
         rect.left += offsetX;
         rect.right += offsetX;
         normalize();
-        super.setOffsetX(offsetX);
+        super.setOffsetX(rect.left - mLeft);
     }
 
     @Override
@@ -134,10 +134,11 @@ class DayCell extends Cell {
 
     @Override
     public String toString() {
-        return "DayCell: l - " + mLeft +
+        return "[DayCell: {l - " + mLeft +
                 ", t - " + mTop +
                 ", r - " + mRight +
                 ", b - " + mBottom +
-                ", off - " + getOffsetY();
+                ", offX - " + getOffsetX() +
+                ", offY - " + getOffsetY() + "}]";
     }
 }

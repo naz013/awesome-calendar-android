@@ -47,8 +47,10 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
 
     private int mLastEvent;
     private float mLastX;
+    private float mStartX;
     private float mLastY;
-    private float mTarget;
+    private float mStartY;
+    private float mLastSlide;
 
     private Animator mAnimator;
     private boolean mTouchAnimator;
@@ -80,11 +82,11 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
     }
 
     public void setOnDateClickListener(OnDateClickListener listener) {
-        this.mDateClickListener =  listener;
+        this.mDateClickListener = listener;
     }
 
     public void setOnDateLongClickListener(OnDateLongClickListener listener) {
-        this.mDateLongClickListener =  listener;
+        this.mDateLongClickListener = listener;
     }
 
     public OnDateClickListener getOnDateClickListener() {
@@ -149,7 +151,7 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
         if (mWidth == 0 || mHeight == 0) {
             return;
         }
-        if (mSlideAnimator.isEmpty()) {
+        if (mAnimator.isEmpty()) {
             MonthCell currentMonth = CellFactory.getMonth(mRealDate, mRealDate, mWidth, mHeight, 0);
             MonthCell prevMonth = CellFactory.getMonth(mRealDate, shiftMonth(mRealDate, -1), mWidth, mHeight, -1);
             MonthCell nextMonth = CellFactory.getMonth(mRealDate, shiftMonth(mRealDate, 1), mWidth, mHeight, 1);
@@ -159,14 +161,15 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
             ContainerCell prev = mSlideAnimator.getPrevious();
             ContainerCell current = mSlideAnimator.getCurrent();
             ContainerCell next = mSlideAnimator.getNext();
+            MonthCell currentMonth = mColExpAnimator.getCell();
             boolean isExpanded = mColExpAnimator.getState() == CollapseExpandAnimator.STATE_EXPANDED;
             if (slide == 0) {
                 if (isExpanded) {
-                    prev = CellFactory.getMonth(mRealDate, shiftMonth(current.getMiddle(), -1), mWidth, mHeight, -1);
-                    current = CellFactory.getMonth(mRealDate, current.getMiddle(), mWidth, mHeight, 0);
-                    next = CellFactory.getMonth(mRealDate, shiftMonth(current.getMiddle(), 1), mWidth, mHeight, 1);
+                    prev = CellFactory.getMonth(mRealDate, shiftMonth(currentMonth.getMiddle(), -1), mWidth, mHeight, -1);
+                    current = CellFactory.getMonth(mRealDate, currentMonth.getMiddle(), mWidth, mHeight, 0);
+                    next = CellFactory.getMonth(mRealDate, shiftMonth(currentMonth.getMiddle(), 1), mWidth, mHeight, 1);
                 } else {
-                    current = CellFactory.getWeek(mRealDate, current.getTail(), mWidth, mHeight, 0);
+                    current = CellFactory.getWeek(mRealDate, currentMonth.getTail(), mWidth, mHeight, 0);
                     prev = CellFactory.getWeek(mRealDate, current.getHead().minusDays(7), mWidth, mHeight, -1);
                     next = CellFactory.getWeek(mRealDate, current.getHead().plusDays(7), mWidth, mHeight, 1);
                 }
@@ -190,14 +193,16 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
                 }
             }
             mSlideAnimator.setCells(prev, current, next);
-            mColExpAnimator.setCell(CellFactory.getMonth(mRealDate, current.getMiddle(), mWidth, mHeight, 0));
+            if (slide != 0) {
+                mColExpAnimator.setCell(CellFactory.getMonth(mRealDate, current.getMiddle(), mWidth, mHeight, 0));
+            }
         }
     }
 
     private DateTime shiftMonth(DateTime dateTime, int offset) {
         if (offset > 0) {
             return dateTime.plusDays(30);
-        }else {
+        } else {
             return dateTime.minusDays(30);
         }
     }
@@ -206,8 +211,10 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawColor(mPainter.getBackgroundPaint().getColor());
-        this.mWidth = getWidth();
-        this.mHeight = getHeight();
+        if (this.mWidth == 0 && mHeight == 0) {
+            this.mWidth = getWidth();
+            this.mHeight = getHeight();
+        }
         if (mAnimator.isEmpty()) {
             calculateCalendar(0);
         }
@@ -217,7 +224,6 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Log.d(TAG, "onTouchEvent: " + event);
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 processDown(event);
@@ -233,24 +239,28 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
 
     private void processMove(MotionEvent event) {
         if (!mTouchAnimator) {
-//            if (Math.abs(mLastX - event.getX()) > Math.abs(mLastY - event.getY())) {
-//                mAnimator = mSlideAnimator;
-//            } else {
+            if (Math.abs(mLastX - event.getX()) > Math.abs(mLastY - event.getY())) {
+                mAnimator = mSlideAnimator;
+            } else {
                 mAnimator = mColExpAnimator;
-//            }
+            }
             mAnimator.start((int) mLastX, (int) mLastY);
             mTouchAnimator = true;
         }
         if (mAnimator instanceof CollapseExpandAnimator) {
-
+            mLastSlide = event.getY() - mLastY;
+        } else {
+            mLastSlide = event.getX() - mLastX;
         }
+        mLastX = event.getX();
+        mLastY = event.getY();
         mAnimator.animate((int) event.getX(), (int) event.getY());
         mLastEvent = event.getAction();
     }
 
     private boolean processUp(MotionEvent event) {
         if (mLastEvent == MotionEvent.ACTION_DOWN) {
-            DateTime touchedPosition = getSelectedPosition(mLastX, mLastY);
+            DateTime touchedPosition = getSelectedPosition(mStartX, mStartY);
             DateTime releasedPosition = getSelectedPosition(event.getX(), event.getY());
             if (touchedPosition != null && releasedPosition != null && touchedPosition.isSameDayAs(releasedPosition)) {
                 if (mDateClickListener != null) {
@@ -259,15 +269,18 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
                 return super.performClick();
             }
         } else if (mLastEvent == MotionEvent.ACTION_MOVE) {
-            mAnimator.finishAnimation((int) event.getX(), (int) event.getY());
+            mAnimator.finishAnimation((int) event.getX() + (int) mLastSlide, (int) event.getY() + (int) mLastSlide);
         }
         mTouchAnimator = false;
         return false;
     }
 
     private void processDown(MotionEvent event) {
+        mAnimator.cancelAnimation();
         mLastX = event.getX();
         mLastY = event.getY();
+        mStartX = mLastX;
+        mStartY = mLastY;
         mLastEvent = event.getAction();
     }
 
@@ -277,37 +290,31 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (mColExpAnimator.getState() == CollapseExpandAnimator.STATE_EXPANDED) {
+        if (mWidth == 0 && mHeight == 0) {
             int widthPixels = View.MeasureSpec.getSize(widthMeasureSpec);
             int widthMode = View.MeasureSpec.getMode(widthMeasureSpec);
             int height = widthPixels / 7 * 6;
             int newHeightSpec = View.MeasureSpec.makeMeasureSpec(height, widthMode);
             super.onMeasure(widthMeasureSpec, newHeightSpec);
-        } else if (mColExpAnimator.getState() == CollapseExpandAnimator.STATE_COLLAPSED) {
-            int widthPixels = View.MeasureSpec.getSize(widthMeasureSpec);
-            int widthMode = View.MeasureSpec.getMode(widthMeasureSpec);
-            int height = widthPixels / 7;
-            int newHeightSpec = View.MeasureSpec.makeMeasureSpec(height, widthMode);
-            super.onMeasure(widthMeasureSpec, newHeightSpec);
         } else {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
-        Log.d(TAG, "onMeasure: ");
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mColExpAnimator.onDestroy();
+        mColExpAnimator.cancelAnimation();
     }
 
     @Override
     public void onStateChanged(int state) {
+        Log.d(TAG, "onStateChanged: " + state);
         if (state == PageSlideAnimator.STATE_SLIDE_LEFT) {
             calculateCalendar(-1);
         } else if (state == PageSlideAnimator.STATE_SLIDE_RIGHT) {
             calculateCalendar(1);
-        } else {
+        } else if (state == CollapseExpandAnimator.STATE_COLLAPSED) {
             calculateCalendar(0);
         }
     }

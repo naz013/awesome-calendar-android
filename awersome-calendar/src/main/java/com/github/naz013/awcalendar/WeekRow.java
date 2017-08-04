@@ -41,12 +41,22 @@ class WeekRow extends ContainerCell {
 
     WeekRow(List<DayCell> mCells) {
         this.mCells = mCells;
-        for (DayCell dayCell : mCells) {
+        DayCell cell = mCells.get(0);
+        mLeft = cell.getLeft();
+        mTop = cell.getTop();
+        mRight = cell.getRight();
+        mBottom = cell.getBottom();
+        for (int i = 1; i < mCells.size(); i++) {
+            DayCell dayCell = mCells.get(i);
             if (dayCell.getLeft() < mLeft) mLeft = dayCell.getLeft();
             if (dayCell.getTop() < mTop) mTop = dayCell.getTop();
             if (dayCell.getRight() > mRight) mRight = dayCell.getRight();
             if (dayCell.getBottom() > mBottom) mBottom = dayCell.getBottom();
         }
+        left = mLeft;
+        top = mTop;
+        right = mRight;
+        bottom = mBottom;
     }
 
     public List<DayCell> getCells() {
@@ -111,11 +121,13 @@ class WeekRow extends ContainerCell {
     }
 
     private void calculateDimensions() {
-        left = 0;
-        top = 0;
-        right = 0;
-        bottom = 0;
-        for (DayCell dayCell : mCells) {
+        DayCell cell = mCells.get(0);
+        left = cell.getLeft();
+        top = cell.getTop();
+        right = cell.getRight();
+        bottom = cell.getBottom();
+        for (int i = 1; i < mCells.size(); i++) {
+            DayCell dayCell = mCells.get(i);
             if (dayCell.getLeft() < left) left = dayCell.getLeft();
             if (dayCell.getTop() < top) top = dayCell.getTop();
             if (dayCell.getRight() > right) right = dayCell.getRight();
@@ -166,6 +178,10 @@ class WeekRow extends ContainerCell {
 
     @Override
     public String toString() {
-        return "WeekRow: " + mCells;
+        return "[WeekRow: {l - " + left +
+                ", t - " + top +
+                ", r - " + right +
+                ", b - " + bottom +
+                "}, Cells - " + mCells + "]";
     }
 }

@@ -2,6 +2,7 @@ package com.github.naz013.awcalendar;
 
 import android.graphics.Canvas;
 import android.os.Handler;
+import android.util.Log;
 
 import hirondelle.date4j.DateTime;
 
@@ -28,12 +29,12 @@ class PageSlideAnimator extends Animator {
     static final int STATE_SLIDE_LEFT = 2;
 
     private static final long ANIMATION_DELAY = 13L;
-    private static final int ANIMATION_SPEED_PIXELS = 15;
+    private static final int ANIMATION_SPEED_PIXELS = 30;
+
+    private static final int ANIMATION_SLIDE_LEFT = 3;
+    private static final int ANIMATION_SLIDE_RIGHT = 4;
 
     private static final String TAG = "PageSlideAnimator";
-
-    private static final int ANIMATION_RIGHT = 5;
-    private static final int ANIMATION_LEFT = 6;
 
     private ContainerCell mPrevCell;
     private ContainerCell mCurrentCell;
@@ -43,8 +44,8 @@ class PageSlideAnimator extends Animator {
     private int mLastY;
     private MonthWeekView mView;
 
-    private int mAnimation;
     private int mDistance;
+    private int mAnimation;
     private long mDelay = ANIMATION_DELAY;
 
     private int mState;
@@ -56,18 +57,20 @@ class PageSlideAnimator extends Animator {
         public void run() {
             mAnimationHandler.removeCallbacks(mAnimationRunnable);
             mDistance -= ANIMATION_SPEED_PIXELS;
-            if (mAnimation == ANIMATION_LEFT) {
-                animate(mLastX, mLastY - ANIMATION_SPEED_PIXELS);
+            if (mAnimation == ANIMATION_SLIDE_LEFT) {
+                animate(mLastX - ANIMATION_SPEED_PIXELS, mLastY);
             } else {
-                animate(mLastX, mLastY + ANIMATION_SPEED_PIXELS);
+                animate(mLastX + ANIMATION_SPEED_PIXELS, mLastY);
             }
             if (mDistance > 0) {
                 mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
             } else {
-                if (mAnimation == ANIMATION_LEFT) {
+                if (mPrevCell.getLeft() == 0) {
                     setState(STATE_SLIDE_LEFT);
-                } else {
+                } else if (mNextCell.getLeft() == 0) {
                     setState(STATE_SLIDE_RIGHT);
+                } else {
+                    setState(STATE_IDLE);
                 }
             }
         }
@@ -94,29 +97,49 @@ class PageSlideAnimator extends Animator {
         this.mPrevCell = prevCell;
         this.mCurrentCell = currentCell;
         this.mNextCell = nextCell;
+        Log.d(TAG, "setCells: " + mPrevCell);
+        Log.d(TAG, "setCells: " + mCurrentCell);
+        Log.d(TAG, "setCells: " + mNextCell);
     }
 
-//    private void expand(int x, int y) {
-//        start(x, y);
-//        mDistance = mCell.getExpandDistance();
-//        mAnimation = ANIMATION_RIGHT;
-//        if (mDistance > 0) {
-//            float delay = 1000f / (float) mDistance;
-//            mDelay = (int) delay;
-//            mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
-//        }
-//    }
-//
-//    private void collapse(int x, int y) {
-//        start(x, y);
-//        mDistance = mCell.getCollapseDistance();
-//        mAnimation = ANIMATION_LEFT;
-//        if (mDistance > 0) {
-//            float delay = 1000f / (float) mDistance;
-//            mDelay = (int) delay;
-//            mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
-//        }
-//    }
+    private void slide(int x, int y) {
+        boolean slideLeft = mLastX > x;
+        start(x, y);
+        int dC = Math.abs(mCurrentCell.getLeft());
+        int dP = Math.abs(mPrevCell.getLeft());
+        int dN = Math.abs(mNextCell.getLeft());
+        Log.d(TAG, "slide: " + dC + ", " + dP + ", " + dN);
+        if (slideLeft) {
+            if (dN < dC || mCurrentCell.getLeft() < 0) {
+                mDistance = mNextCell.getLeft();
+            } else {
+                mDistance = mCurrentCell.getLeft();
+            }
+            mAnimation = ANIMATION_SLIDE_LEFT;
+        } else {
+            if (dP < dC || mCurrentCell.getLeft() > 0) {
+                mDistance = mPrevCell.getLeft();
+            } else {
+                mDistance = mCurrentCell.getLeft();
+            }
+            mAnimation = ANIMATION_SLIDE_RIGHT;
+        }
+        mDistance = Math.abs(mDistance);
+        if (mDistance > 0) {
+            if (mDistance % 30 != 0) {
+                int off = (mDistance % 30);
+                mDistance -= off;
+                if (mAnimation == ANIMATION_SLIDE_LEFT) {
+                    animate(mLastX - off, mLastY);
+                } else {
+                    animate(mLastX + off, mLastY);
+                }
+            }
+            float delay = 1000f / (float) mDistance;
+            mDelay = Math.abs((int) delay);
+            mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
+        }
+    }
 
     @Override
     public void start(int x, int y) {
@@ -126,16 +149,11 @@ class PageSlideAnimator extends Animator {
 
     @Override
     public void finishAnimation(int x, int y) {
-//        if (y - mLastY > 0) {
-//            expand(x, y);
-//        } else {
-//            collapse(x, y);
-//        }
+        slide(x, y);
     }
 
     @Override
     public void animate(int x, int y) {
-        long st = System.currentTimeMillis();
         int offset = x - mLastX;
         mPrevCell.setOffsetX(offset);
         mCurrentCell.setOffsetX(offset);
@@ -145,7 +163,7 @@ class PageSlideAnimator extends Animator {
     }
 
     @Override
-    public void onDestroy() {
+    public void cancelAnimation() {
         if (mAnimationHandler != null) {
             mAnimationHandler.removeCallbacks(mAnimationRunnable);
         }

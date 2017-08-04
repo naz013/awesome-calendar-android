@@ -1,6 +1,7 @@
 package com.github.naz013.awcalendar;
 
 import android.graphics.Rect;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +27,8 @@ import hirondelle.date4j.DateTime;
 
 class CellFactory {
 
+    private static final String TAG = "CellFactory";
+
     private static final int ROWS = 6;
     private static final int COLS = 7;
 
@@ -33,12 +36,8 @@ class CellFactory {
         List<DateTime> dateTimes = getDateTimes(dt);
         int cellWidth = w / COLS;
         int cellHeight = h / ROWS;
-        int offset = 0;
-        if (oX > 0) {
-            offset += (w + (int) ((float) w * 0.1f));
-        } else if (oX < 0) {
-            offset -= (w - (int) ((float) w * 0.1f));
-        }
+        int offset = calculateOffset(w, oX);
+        Log.d(TAG, "getMonth: " + offset);
         List<WeekRow> weekRows = new ArrayList<>();
         for (int i = 0; i < ROWS; i++) {
             List<DayCell> cells = new ArrayList<>();
@@ -70,12 +69,7 @@ class CellFactory {
         List<DateTime> dateTimes = getWeekDateTimes(dt);
         int cellWidth = w / COLS;
         int cellHeight = h / ROWS;
-        int offset = 0;
-        if (oX > 0) {
-            offset += (w + (int) ((float) w * 0.1f));
-        } else if (oX < 0) {
-            offset -= (w - (int) ((float) w * 0.1f));
-        }
+        int offset = calculateOffset(w, oX);
         List<DayCell> cells = new ArrayList<>();
         for (int j = 0; j < COLS; j++) {
             int left = j * cellWidth;
@@ -86,15 +80,24 @@ class CellFactory {
             }
             cells.add(dayCell);
         }
-        WeekRow row = new WeekRow(cells);
-        return row;
+        return new WeekRow(cells);
+    }
+
+    private static int calculateOffset(int width, int oX) {
+        if (oX > 0) {
+            return width + ((int) ((float) width * 0.1f));
+        } else if (oX < 0) {
+            return -width - ((int) ((float) width * 0.1f));
+        } else {
+            return 0;
+        }
     }
 
     private static List<DateTime> getWeekDateTimes(DateTime dt) {
         List<DateTime> dateTimes = new ArrayList<>();
         for (int i = 0; i < COLS; i++) {
             dateTimes.add(dt);
-            dt = dt.plusDays(i);
+            dt = dt.plusDays(1);
         }
         return dateTimes;
     }
