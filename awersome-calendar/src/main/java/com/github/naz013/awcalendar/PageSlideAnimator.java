@@ -97,9 +97,9 @@ class PageSlideAnimator extends Animator {
         this.mPrevCell = prevCell;
         this.mCurrentCell = currentCell;
         this.mNextCell = nextCell;
-        Log.d(TAG, "setCells: " + mPrevCell);
-        Log.d(TAG, "setCells: " + mCurrentCell);
-        Log.d(TAG, "setCells: " + mNextCell);
+        Log.d(TAG, "setCells: p " + mPrevCell);
+        Log.d(TAG, "setCells: c " + mCurrentCell);
+        Log.d(TAG, "setCells: n " + mNextCell);
     }
 
     private void slide(int x, int y) {
@@ -108,7 +108,7 @@ class PageSlideAnimator extends Animator {
         int dC = Math.abs(mCurrentCell.getLeft());
         int dP = Math.abs(mPrevCell.getLeft());
         int dN = Math.abs(mNextCell.getLeft());
-        Log.d(TAG, "slide: " + dC + ", " + dP + ", " + dN);
+        Log.d(TAG, "slide: " + slideLeft + ", " + dC + ", " + dP + ", " + dN);
         if (slideLeft) {
             if (dN < dC || mCurrentCell.getLeft() < 0) {
                 mDistance = mNextCell.getLeft();

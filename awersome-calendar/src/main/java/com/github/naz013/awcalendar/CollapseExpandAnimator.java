@@ -29,8 +29,8 @@ class CollapseExpandAnimator extends Animator {
 
     private static final String TAG = "CollapseExpandAnimator";
 
-    static final int STATE_EXPANDED = 2;
-    static final int STATE_COLLAPSED = 3;
+    static final int STATE_EXPANDED = 3;
+    static final int STATE_COLLAPSED = 4;
 
     private static final int ANIMATION_EXPAND = 5;
     private static final int ANIMATION_COLLAPSE = 6;
@@ -102,6 +102,8 @@ class CollapseExpandAnimator extends Animator {
             float delay = 1000f / (float) mDistance;
             mDelay = (int) delay;
             mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
+        } else {
+            setState(STATE_EXPANDED);
         }
     }
 
@@ -114,6 +116,8 @@ class CollapseExpandAnimator extends Animator {
             float delay = 1000f / (float) mDistance;
             mDelay = (int) delay;
             mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
+        } else {
+            setState(STATE_COLLAPSED);
         }
     }
 

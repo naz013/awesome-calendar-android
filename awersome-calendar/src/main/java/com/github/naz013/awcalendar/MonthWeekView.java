@@ -46,6 +46,8 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
     private Painter mPainter;
 
     private int mLastEvent;
+    private int mState;
+
     private float mLastX;
     private float mStartX;
     private float mLastY;
@@ -144,7 +146,7 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
         calendar.setTimeInMillis(System.currentTimeMillis());
 
         mRealDate = new DateTime(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-                calendar.get(Calendar.DAY_OF_MONTH), 0, 0, 0, 0);
+                calendar.get(Calendar.DAY_OF_MONTH), 12, 0, 0, 0);
     }
 
     private void calculateCalendar(int slide) {
@@ -152,9 +154,9 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
             return;
         }
         if (mAnimator.isEmpty()) {
-            MonthCell currentMonth = CellFactory.getMonth(mRealDate, mRealDate, mWidth, mHeight, 0);
-            MonthCell prevMonth = CellFactory.getMonth(mRealDate, shiftMonth(mRealDate, -1), mWidth, mHeight, -1);
-            MonthCell nextMonth = CellFactory.getMonth(mRealDate, shiftMonth(mRealDate, 1), mWidth, mHeight, 1);
+            MonthCell currentMonth = CellFactory.getMonth(mRealDate, mRealDate, mRealDate, mWidth, mHeight, 0);
+            MonthCell prevMonth = CellFactory.getMonth(mRealDate, shiftMonth(mRealDate, -1), mRealDate, mWidth, mHeight, -1);
+            MonthCell nextMonth = CellFactory.getMonth(mRealDate, shiftMonth(mRealDate, 1), mRealDate, mWidth, mHeight, 1);
             mColExpAnimator.setCell(currentMonth);
             mSlideAnimator.setCells(prevMonth, currentMonth, nextMonth);
         } else {
@@ -163,39 +165,42 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
             ContainerCell next = mSlideAnimator.getNext();
             MonthCell currentMonth = mColExpAnimator.getCell();
             boolean isExpanded = mColExpAnimator.getState() == CollapseExpandAnimator.STATE_EXPANDED;
-            if (slide == 0) {
-                if (isExpanded) {
-                    prev = CellFactory.getMonth(mRealDate, shiftMonth(currentMonth.getMiddle(), -1), mWidth, mHeight, -1);
-                    current = CellFactory.getMonth(mRealDate, currentMonth.getMiddle(), mWidth, mHeight, 0);
-                    next = CellFactory.getMonth(mRealDate, shiftMonth(currentMonth.getMiddle(), 1), mWidth, mHeight, 1);
-                } else {
-                    current = CellFactory.getWeek(mRealDate, currentMonth.getTail(), mWidth, mHeight, 0);
-                    prev = CellFactory.getWeek(mRealDate, current.getHead().minusDays(7), mWidth, mHeight, -1);
-                    next = CellFactory.getWeek(mRealDate, current.getHead().plusDays(7), mWidth, mHeight, 1);
+            if (isExpanded) {
+                ContainerCell c = current;
+                if (slide > 0) {
+                    c = next;
+                } else if (slide < 0) {
+                    c = prev;
                 }
+                DateTime m = c.getMiddle();
+                DateTime h = c.getHead();
+                DateTime t = c.getTail();
+                prev = CellFactory.getMonth(mRealDate, shiftMonth(m, -1), m, mWidth, mHeight, -1);
+                next = CellFactory.getMonth(mRealDate, shiftMonth(m, 1), m, mWidth, mHeight, 1);
+                MonthCell cell;
+                if (mState == CollapseExpandAnimator.STATE_COLLAPSED) {
+                    cell = CellFactory.getMonth(mRealDate, t, t, mWidth, mHeight, 0);
+                    current = CellFactory.getMonth(mRealDate, m, m, mWidth, mHeight, 0);
+                } else {
+                    current = CellFactory.getMonth(mRealDate, m, m, mWidth, mHeight, 0);
+                    cell = CellFactory.getMonth(mRealDate, m, h, mWidth, mHeight, 0);
+                }
+                mColExpAnimator.setCell(cell);
             } else {
                 if (slide > 0) {
-                    next = current;
-                    current = prev;
-                    if (isExpanded) {
-                        prev = CellFactory.getMonth(mRealDate, shiftMonth(current.getMiddle(), -1), mWidth, mHeight, -1);
-                    } else {
-                        prev = CellFactory.getWeek(mRealDate, current.getHead().minusDays(7), mWidth, mHeight, -1);
-                    }
+                    current = CellFactory.getWeek(mRealDate, next.getHead(), mWidth, mHeight, 0);
                 } else if (slide < 0) {
-                    prev = current;
-                    current = next;
-                    if (isExpanded) {
-                        next = CellFactory.getMonth(mRealDate, shiftMonth(current.getMiddle(), 1), mWidth, mHeight, 1);
-                    } else {
-                        next = CellFactory.getWeek(mRealDate, current.getHead().plusDays(7), mWidth, mHeight, 1);
-                    }
+                    current = CellFactory.getWeek(mRealDate, prev.getHead(), mWidth, mHeight, 0);
+                } else {
+                    current = CellFactory.getWeek(mRealDate, currentMonth.getTail(), mWidth, mHeight, 0);
                 }
+                prev = CellFactory.getWeek(mRealDate, current.getHead().minusDays(7), mWidth, mHeight, -1);
+                next = CellFactory.getWeek(mRealDate, current.getHead().plusDays(7), mWidth, mHeight, 1);
+                MonthCell cell = CellFactory.getMonth(mRealDate, current.getMiddle(), current.getMiddle(), mWidth, mHeight, 0);
+                cell.setOffsetY(-cell.getCollapseDistance());
+                mColExpAnimator.setCell(cell);
             }
             mSlideAnimator.setCells(prev, current, next);
-            if (slide != 0) {
-                mColExpAnimator.setCell(CellFactory.getMonth(mRealDate, current.getMiddle(), mWidth, mHeight, 0));
-            }
         }
     }
 
@@ -276,7 +281,6 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
     }
 
     private void processDown(MotionEvent event) {
-        mAnimator.cancelAnimation();
         mLastX = event.getX();
         mLastY = event.getY();
         mStartX = mLastX;
@@ -315,8 +319,12 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
         } else if (state == PageSlideAnimator.STATE_SLIDE_RIGHT) {
             calculateCalendar(1);
         } else if (state == CollapseExpandAnimator.STATE_COLLAPSED) {
+            mAnimator = mSlideAnimator;
+            calculateCalendar(0);
+        } else if (state == CollapseExpandAnimator.STATE_EXPANDED) {
             calculateCalendar(0);
         }
+        mState = state;
     }
 
     public interface OnDateClickListener {

@@ -32,16 +32,16 @@ class CellFactory {
     private static final int ROWS = 6;
     private static final int COLS = 7;
 
-    static MonthCell getMonth(DateTime mRealDate, DateTime dt, int w, int h, int oX) {
+    static MonthCell getMonth(DateTime mRealDate, DateTime dt, DateTime anchor, int w, int h, int oX) {
+        Log.d(TAG, "getMonth: " + dt + ", " + anchor);
         List<DateTime> dateTimes = getDateTimes(dt);
         int cellWidth = w / COLS;
         int cellHeight = h / ROWS;
         int offset = calculateOffset(w, oX);
-        Log.d(TAG, "getMonth: " + offset);
         List<WeekRow> weekRows = new ArrayList<>();
+        int thisWeek = 0;
         for (int i = 0; i < ROWS; i++) {
             List<DayCell> cells = new ArrayList<>();
-            int thisWeek = -1;
             for (int j = 0; j < COLS; j++) {
                 int top = i * cellHeight;
                 int left = j * cellWidth;
@@ -49,6 +49,8 @@ class CellFactory {
                 DayCell dayCell = new DayCell(tmp, dateTimes.get(i * 7 + j));
                 if (dayCell.getDateTime().isSameDayAs(mRealDate)) {
                     dayCell.setCurrent(true);
+                }
+                if (dayCell.getDateTime().isSameDayAs(anchor)) {
                     thisWeek = i;
                 }
                 cells.add(dayCell);
@@ -66,6 +68,7 @@ class CellFactory {
     }
 
     static WeekRow getWeek(DateTime mRealDate, DateTime dt, int w, int h, int oX) {
+        Log.d(TAG, "getWeek: " + dt);
         List<DateTime> dateTimes = getWeekDateTimes(dt);
         int cellWidth = w / COLS;
         int cellHeight = h / ROWS;
@@ -119,7 +122,7 @@ class CellFactory {
             dateTimes.add(dateTime);
             weekdayOfFirstDate--;
         }
-        for (int i = 0; i < lastDateOfMonth.getDay() - 1; i++) {
+        for (int i = 0; i <= lastDateOfMonth.getDay() - 1; i++) {
             dateTimes.add(firstDateOfMonth.plusDays(i));
         }
         int endDayOfWeek = startDayOfWeek - 1;

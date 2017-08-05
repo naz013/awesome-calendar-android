@@ -1,7 +1,6 @@
 package com.github.naz013.awcalendar;
 
 import android.graphics.Canvas;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;

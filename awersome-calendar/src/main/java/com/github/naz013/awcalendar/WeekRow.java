@@ -182,6 +182,6 @@ class WeekRow extends ContainerCell {
                 ", t - " + top +
                 ", r - " + right +
                 ", b - " + bottom +
-                "}, Cells - " + mCells + "]";
+                "}, 1Cell - " + mCells.get(0) + "]";
     }
 }

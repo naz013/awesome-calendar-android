@@ -24,6 +24,8 @@ import hirondelle.date4j.DateTime;
 
 class DayCell extends Cell {
 
+    private static final String TAG = "DayCell";
+
     private Rect rect;
     private DateTime dateTime;
 
@@ -134,11 +136,14 @@ class DayCell extends Cell {
 
     @Override
     public String toString() {
-        return "[DayCell: {l - " + mLeft +
-                ", t - " + mTop +
-                ", r - " + mRight +
-                ", b - " + mBottom +
-                ", offX - " + getOffsetX() +
-                ", offY - " + getOffsetY() + "}]";
+        return "[DayCell: {l - " + rect.left +
+                ", t - " + rect.top +
+                ", r - " + rect.right +
+                ", b - " + rect.bottom +
+                ", iL - " + mLeft +
+                ", iT - " + mTop +
+                ", iR - " + mRight +
+                ", iB - " + mBottom +
+                ", dt - " + dateTime + "}]";
     }
 }
