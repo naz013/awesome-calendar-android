@@ -34,7 +34,11 @@ abstract class Animator implements PaintInterface {
 
     public abstract void finishAnimation(int x, int y);
 
-    public abstract void cancelAnimation();
+    /**
+     * Stop currently running animation.
+     * @return - Return true if canceled active animation.
+     */
+    public abstract boolean cancelAnimation();
 
     public abstract DateTime getClicked(int x, int y);
 

@@ -73,6 +73,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     private boolean mTouchAnimator;
     private CollapseExpandAnimator mColExpAnimator;
     private PageSlideAnimator mSlideAnimator;
+    private boolean mIsAnimationCanceled;
 
     private OnDateClickListener mDateClickListener;
     private OnDateLongClickListener mDateLongClickListener;
@@ -309,10 +310,12 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
 
     private void processMove(MotionEvent event) {
         if (!mTouchAnimator) {
-            if (Math.abs(mLastX - event.getX()) > Math.abs(mLastY - event.getY())) {
-                mAnimator = mSlideAnimator;
-            } else {
-                mAnimator = mColExpAnimator;
+            if (!mIsAnimationCanceled) {
+                if (Math.abs(mLastX - event.getX()) > Math.abs(mLastY - event.getY())) {
+                    mAnimator = mSlideAnimator;
+                } else {
+                    mAnimator = mColExpAnimator;
+                }
             }
             mAnimator.start((int) mLastX, (int) mLastY);
             mTouchAnimator = true;
@@ -330,6 +333,9 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
 
     private boolean processUp(MotionEvent event) {
         if (mLastEvent == MotionEvent.ACTION_DOWN) {
+            if (mIsAnimationCanceled) {
+                mAnimator.finishAnimation((int) event.getX() + (int) mLastSlide, (int) event.getY() + (int) mLastSlide);
+            }
             DateTime touchedPosition = getSelectedPosition(mStartX, mStartY);
             DateTime releasedPosition = getSelectedPosition(event.getX(), event.getY());
             if (touchedPosition != null && releasedPosition != null && touchedPosition.isSameDayAs(releasedPosition)) {
@@ -346,6 +352,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     }
 
     private void processDown(MotionEvent event) {
+        mIsAnimationCanceled = mAnimator.cancelAnimation();
         mLastX = event.getX();
         mLastY = event.getY();
         mStartX = mLastX;

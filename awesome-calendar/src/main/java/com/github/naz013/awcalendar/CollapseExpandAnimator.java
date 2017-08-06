@@ -55,6 +55,7 @@ class CollapseExpandAnimator extends Animator {
 
     private int mState = STATE_EXPANDED;
     private OnStateListener mOnStateListener;
+    private boolean mIsAnimating;
 
     private Handler mAnimationHandler = new Handler();
     private Runnable mAnimationRunnable = new Runnable() {
@@ -69,8 +70,10 @@ class CollapseExpandAnimator extends Animator {
                 animate(mLastX, mLastY + speed);
             }
             if (mDistance > 0) {
+                mIsAnimating = true;
                 mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
             } else {
+                mIsAnimating = false;
                 if (mAnimationType == ANIMATION_COLLAPSE) {
                     setState(STATE_COLLAPSED);
                 } else {
@@ -162,13 +165,15 @@ class CollapseExpandAnimator extends Animator {
     }
 
     @Override
-    public void cancelAnimation() {
-        if (mAnimationHandler != null) {
+    public boolean cancelAnimation() {
+        if (mAnimationHandler != null && mIsAnimating) {
             mAnimationHandler.removeCallbacks(mAnimationRunnable);
+            return true;
         }
+        return false;
     }
 
-    void setState(int state) {
+    private void setState(int state) {
         this.mState = state;
         if (mOnStateListener != null) {
             mOnStateListener.onStateChanged(state);

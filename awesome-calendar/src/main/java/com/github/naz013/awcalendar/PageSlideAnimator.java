@@ -55,6 +55,7 @@ class PageSlideAnimator extends Animator {
     private Animation mAnimation;
     private int mAnimationType;
     private long mDelay = ANIMATION_DELAY;
+    private boolean mIsAnimating;
 
     private int mState;
     private OnStateListener mOnStateListener;
@@ -75,8 +76,10 @@ class PageSlideAnimator extends Animator {
                 animate(mLastX + speed, mLastY);
             }
             if (mDistance > 0) {
+                mIsAnimating = true;
                 mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
             } else {
+                mIsAnimating = false;
                 if (mPrevCell.getLeft() == 0) {
                     setState(STATE_SLIDE_LEFT);
                 } else if (mNextCell.getLeft() == 0) {
@@ -191,10 +194,12 @@ class PageSlideAnimator extends Animator {
     }
 
     @Override
-    public void cancelAnimation() {
-        if (mAnimationHandler != null) {
+    public boolean cancelAnimation() {
+        if (mAnimationHandler != null && mIsAnimating) {
             mAnimationHandler.removeCallbacks(mAnimationRunnable);
+            return true;
         }
+        return false;
     }
 
     private void setState(int state) {
