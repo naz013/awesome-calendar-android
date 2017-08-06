@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MonthWeekView">
+        <attr name="ac_day_bg_color" format="color" />
+        <attr name="ac_day_border_color" format="color" />
+        <attr name="ac_day_text_color" format="color" />
+        <attr name="ac_day_current_text_color" format="color" />
+        <attr name="ac_day_unselected_text_color" format="color" />
+        <attr name="ac_event_color" format="color" />
+        <attr name="ac_start_day_of_week" format="enum" >
+            <enum name="sunday" value="0" />
+            <enum name="monday" value="1" />
+            <enum name="tuesday" value="2" />
+            <enum name="wednesday" value="3" />
+            <enum name="thursday" value="4" />
+            <enum name="friday" value="5" />
+            <enum name="saturday" value="6" />
+        </attr>
+    </declare-styleable>
+</resources>
