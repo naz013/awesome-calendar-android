@@ -79,7 +79,17 @@ class PageSlideAnimator extends Animator {
 
     PageSlideAnimator(MonthWeekView monthWeekView) {
         this.mView = monthWeekView;
-        this.mAnimation = new Animation();
+        this.mAnimation = new Animation() {
+            @Override
+            public int acceleration() {
+                return 2;
+            }
+
+            @Override
+            public int deceleration() {
+                return 5;
+            }
+        };
         setState(STATE_IDLE);
     }
 
