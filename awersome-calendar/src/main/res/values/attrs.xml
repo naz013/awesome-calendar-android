@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="MonthWeekView">
+    <declare-styleable name="AwesomeCalendarView">
         <attr name="ac_day_bg_color" format="color" />
         <attr name="ac_day_border_color" format="color" />
         <attr name="ac_day_text_color" format="color" />

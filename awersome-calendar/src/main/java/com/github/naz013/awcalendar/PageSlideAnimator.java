@@ -41,7 +41,7 @@ class PageSlideAnimator extends Animator {
 
     private int mLastX;
     private int mLastY;
-    private MonthWeekView mView;
+    private AwesomeCalendarView mView;
 
     private int mDistance;
     private Animation mAnimation;
@@ -77,8 +77,8 @@ class PageSlideAnimator extends Animator {
         }
     };
 
-    PageSlideAnimator(MonthWeekView monthWeekView) {
-        this.mView = monthWeekView;
+    PageSlideAnimator(AwesomeCalendarView awesomeCalendarView) {
+        this.mView = awesomeCalendarView;
         this.mAnimation = new Animation() {
             @Override
             public int acceleration() {

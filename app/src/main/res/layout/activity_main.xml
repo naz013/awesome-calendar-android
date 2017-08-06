@@ -7,7 +7,7 @@
     android:orientation="vertical"
     tools:context="com.github.naz013.awersomecalendar.MainActivity">
 
-    <com.github.naz013.awcalendar.MonthWeekView
+    <com.github.naz013.awcalendar.AwesomeCalendarView
         android:id="@+id/calendar_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

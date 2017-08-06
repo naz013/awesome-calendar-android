@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.github.naz013.awcalendar.Event;
-import com.github.naz013.awcalendar.MonthWeekView;
+import com.github.naz013.awcalendar.AwesomeCalendarView;
 import com.github.naz013.awcalendar.Utils;
 
 import java.util.ArrayList;
@@ -32,8 +32,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        MonthWeekView calendarView = findViewById(R.id.calendar_view);
-        calendarView.setOnDateClickListener(new MonthWeekView.OnDateClickListener() {
+        AwesomeCalendarView calendarView = findViewById(R.id.calendar_view);
+        calendarView.setOnDateClickListener(new AwesomeCalendarView.OnDateClickListener() {
             @Override
             public void onDateClicked(DateTime dateTime) {
                 Log.d(TAG, "onDateClicked: " + dateTime);

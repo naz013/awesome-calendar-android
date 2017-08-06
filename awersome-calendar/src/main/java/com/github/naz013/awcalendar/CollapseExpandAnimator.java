@@ -34,7 +34,7 @@ class CollapseExpandAnimator extends Animator {
     private static final int ANIMATION_EXPAND = 5;
     private static final int ANIMATION_COLLAPSE = 6;
 
-    private MonthWeekView mView;
+    private AwesomeCalendarView mView;
     private MonthCell mCell;
 
     private int mLastX;
@@ -72,7 +72,7 @@ class CollapseExpandAnimator extends Animator {
         }
     };
 
-    CollapseExpandAnimator(MonthWeekView view) {
+    CollapseExpandAnimator(AwesomeCalendarView view) {
         this.mView = view;
         mAnimation = new Animation();
         setState(STATE_EXPANDED);

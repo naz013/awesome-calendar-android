@@ -37,7 +37,7 @@ import hirondelle.date4j.DateTime;
  * limitations under the License.
  */
 
-public class MonthWeekView extends View implements PageSlideAnimator.OnStateListener,
+public class AwesomeCalendarView extends View implements PageSlideAnimator.OnStateListener,
         CollapseExpandAnimator.OnStateListener {
 
     private static final String TAG = "git.MonthWeekView";
@@ -68,23 +68,23 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
     private OnDateClickListener mDateClickListener;
     private OnDateLongClickListener mDateLongClickListener;
 
-    public MonthWeekView(Context context) {
+    public AwesomeCalendarView(Context context) {
         super(context);
         init(context, null, 0, 0);
     }
 
-    public MonthWeekView(Context context, @Nullable AttributeSet attrs) {
+    public AwesomeCalendarView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init(context, attrs, 0, 0);
     }
 
-    public MonthWeekView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public AwesomeCalendarView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs, defStyleAttr, 0);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public MonthWeekView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public AwesomeCalendarView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs, defStyleAttr, defStyleRes);
     }
