@@ -39,6 +39,12 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "onDateClicked: " + dateTime);
             }
         });
+        calendarView.setOnCurrentMonthListener(new AwesomeCalendarView.OnCurrentMonthListener() {
+            @Override
+            public void onMonthSelected(int year, int month) {
+                Log.d(TAG, "onMonthSelected: " + year + "-" + month);
+            }
+        });
         calendarView.setEvents(getEvents());
 
         RecyclerView rv = findViewById(R.id.list_view);

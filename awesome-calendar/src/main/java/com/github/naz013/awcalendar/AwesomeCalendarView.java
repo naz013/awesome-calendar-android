@@ -76,6 +76,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
 
     private OnDateClickListener mDateClickListener;
     private OnDateLongClickListener mDateLongClickListener;
+    private OnCurrentMonthListener mOnCurrentMonthListener;
 
     public AwesomeCalendarView(Context context) {
         super(context);
@@ -112,6 +113,14 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
 
     public OnDateLongClickListener getOnDateLongClickListener() {
         return mDateLongClickListener;
+    }
+
+    public OnCurrentMonthListener getOnCurrentMonthListener() {
+        return mOnCurrentMonthListener;
+    }
+
+    public void setOnCurrentMonthListener(OnCurrentMonthListener onCurrentMonthListener) {
+        this.mOnCurrentMonthListener = onCurrentMonthListener;
     }
 
     public void setCollapseExpandAnimation(Animation animation) {
@@ -252,6 +261,10 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
             }
             mSlideAnimator.setCells(prev, current, next);
         }
+        if (mOnCurrentMonthListener != null && !mAnimator.isEmpty()) {
+            DateTime dt = mColExpAnimator.getCell().getMiddle();
+            mOnCurrentMonthListener.onMonthSelected(dt.getYear(), dt.getMonth());
+        }
     }
 
     private DateTime shiftMonth(DateTime dateTime, int offset) {
@@ -371,7 +384,6 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
         } else if (state == PageSlideAnimator.STATE_SLIDE_RIGHT) {
             calculateCalendar(1);
         } else if (state == CollapseExpandAnimator.STATE_COLLAPSED) {
-//            mAnimator = mSlideAnimator;
             calculateCalendar(0);
         } else if (state == CollapseExpandAnimator.STATE_EXPANDED) {
             calculateCalendar(0);
@@ -385,5 +397,14 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
 
     public interface OnDateLongClickListener {
         void onDateLongClicked(DateTime dateTime);
+    }
+
+    public interface OnCurrentMonthListener {
+        /**
+         * Returns current year and month in view.
+         * @param year - year;
+         * @param month - month in range 1 - 12;
+         */
+        void onMonthSelected(int year, int month);
     }
 }

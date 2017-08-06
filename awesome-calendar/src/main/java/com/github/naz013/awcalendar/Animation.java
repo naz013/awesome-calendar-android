@@ -1,7 +1,6 @@
 package com.github.naz013.awcalendar;
 
 import android.support.annotation.IntRange;
-import android.util.Log;
 
 /**
  * MIT License
@@ -62,7 +61,6 @@ public class Animation {
             }
         }
         leftDistance -= speed;
-        Log.d(TAG, "getSpeed: " + leftDistance + ", " + speed);
         return speed;
     }
 
