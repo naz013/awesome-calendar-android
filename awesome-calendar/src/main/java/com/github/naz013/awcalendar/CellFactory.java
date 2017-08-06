@@ -1,7 +1,6 @@
 package com.github.naz013.awcalendar;
 
 import android.graphics.Rect;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +42,7 @@ class CellFactory {
 
     static MonthCell getMonth(DateTime realDate, DateTime dt, DateTime anchor, int w, int ch, int oX,
                               Map<DateTime, List<Event>> map, boolean isOutMapping, int startDayOfWeek) {
-        Log.d(TAG, "getMonth: " + dt + ", " + anchor);
+        Utils.log(TAG, "getMonth: " + dt + ", " + anchor);
         List<DateTime> dateTimes = getDateTimes(dt, startDayOfWeek);
         int cellWidth = w / COLS;
         int offset = calculateOffset(w, oX);
@@ -87,7 +86,7 @@ class CellFactory {
 
     static WeekRow getWeek(DateTime realDate, DateTime dt, int w, int ch, int oX,
                            Map<DateTime, List<Event>> map, boolean isOutMapping) {
-        Log.d(TAG, "getWeek: " + dt);
+        Utils.log(TAG, "getWeek: " + dt);
         List<DateTime> dateTimes = getWeekDateTimes(dt);
         int cellWidth = w / COLS;
         int offset = calculateOffset(w, oX);

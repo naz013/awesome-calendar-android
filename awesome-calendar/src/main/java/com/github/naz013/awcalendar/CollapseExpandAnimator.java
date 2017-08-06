@@ -2,7 +2,6 @@ package com.github.naz013.awcalendar;
 
 import android.graphics.Canvas;
 import android.os.Handler;
-import android.util.Log;
 
 import hirondelle.date4j.DateTime;
 
@@ -99,7 +98,7 @@ class CollapseExpandAnimator extends Animator {
 
     void setCell(MonthCell cell) {
         this.mCell = cell;
-        Log.d(TAG, "setCell: " + cell);
+        Utils.log(TAG, "setCell: " + cell);
     }
 
     public void toggle(int x, int y) {
@@ -114,7 +113,7 @@ class CollapseExpandAnimator extends Animator {
         start(x, y);
         mDistance = mCell.getExpandDistance();
         mAnimationType = ANIMATION_EXPAND;
-        Log.d(TAG, "expand: " + mDistance);
+        Utils.log(TAG, "expand: " + mDistance);
         if (mDistance > 0) {
             float delay = 1000f / (float) mDistance;
             mDelay = (int) delay;
@@ -129,7 +128,7 @@ class CollapseExpandAnimator extends Animator {
         start(x, y);
         mDistance = mCell.getCollapseDistance();
         mAnimationType = ANIMATION_COLLAPSE;
-        Log.d(TAG, "collapse: " + mDistance);
+        Utils.log(TAG, "collapse: " + mDistance);
         if (mDistance > 0) {
             float delay = 1000f / (float) mDistance;
             mDelay = (int) delay;

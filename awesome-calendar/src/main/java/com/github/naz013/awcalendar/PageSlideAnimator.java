@@ -2,7 +2,6 @@ package com.github.naz013.awcalendar;
 
 import android.graphics.Canvas;
 import android.os.Handler;
-import android.util.Log;
 
 import hirondelle.date4j.DateTime;
 
@@ -127,9 +126,9 @@ class PageSlideAnimator extends Animator {
         this.mPrevCell = prevCell;
         this.mCurrentCell = currentCell;
         this.mNextCell = nextCell;
-        Log.d(TAG, "setCells: p " + mPrevCell);
-        Log.d(TAG, "setCells: c " + mCurrentCell);
-        Log.d(TAG, "setCells: n " + mNextCell);
+        Utils.log(TAG, "setCells: p " + mPrevCell);
+        Utils.log(TAG, "setCells: c " + mCurrentCell);
+        Utils.log(TAG, "setCells: n " + mNextCell);
     }
 
     private void slide(int x, int y) {
@@ -138,7 +137,7 @@ class PageSlideAnimator extends Animator {
         int dC = Math.abs(mCurrentCell.getLeft());
         int dP = Math.abs(mPrevCell.getLeft());
         int dN = Math.abs(mNextCell.getLeft());
-        Log.d(TAG, "slide: " + slideLeft + ", " + dC + ", " + dP + ", " + dN);
+        Utils.log(TAG, "slide: " + slideLeft + ", " + dC + ", " + dP + ", " + dN);
         if (slideLeft) {
             if (dN < dC || mCurrentCell.getLeft() < 0) {
                 mDistance = mNextCell.getLeft();

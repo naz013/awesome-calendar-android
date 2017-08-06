@@ -12,7 +12,6 @@ import android.os.Handler;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -50,6 +49,8 @@ import hirondelle.date4j.DateTime;
 
 public class AwesomeCalendarView extends View implements PageSlideAnimator.OnStateListener,
         CollapseExpandAnimator.OnStateListener {
+
+    public static boolean SHOW_LOGS = true;
 
     private static final String TAG = "git.MonthWeekView";
     private static final long LONG_CLICK_DURATION = 500;
@@ -223,7 +224,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
         int outTextColor = Color.YELLOW;
         int currentTextColor = Color.RED;
         int bgColor = Color.WHITE;
-        int eventColor = Color.GRAY;
+        int eventColor = Color.MAGENTA;
         if (attrs != null) {
             TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.AwesomeCalendarView,
                     defStyleAttr, defStyleRes);
@@ -521,7 +522,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
 
     @Override
     public void onStateChanged(int state) {
-        Log.d(TAG, "onStateChanged: " + state);
+        Utils.log(TAG, "onStateChanged: " + state);
         if (state == PageSlideAnimator.STATE_SLIDE_LEFT) {
             calculateCalendar(-1);
         } else if (state == PageSlideAnimator.STATE_SLIDE_RIGHT) {
