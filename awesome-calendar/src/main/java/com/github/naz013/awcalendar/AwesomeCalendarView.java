@@ -135,6 +135,9 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        if (attrs != null) {
+
+        }
         Paint borderPaint = new Paint();
         borderPaint.setAntiAlias(true);
         borderPaint.setColor(Color.BLACK);
@@ -144,14 +147,14 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
         textPaint.setAntiAlias(true);
         textPaint.setColor(Color.BLACK);
         textPaint.setStyle(Paint.Style.STROKE);
-        textPaint.setTextSize(35f);
+        textPaint.setTextSize(50f);
         textPaint.setTextAlign(Paint.Align.CENTER);
 
         Paint currentPaint = new Paint();
         currentPaint.setAntiAlias(true);
         currentPaint.setColor(Color.RED);
         currentPaint.setStyle(Paint.Style.STROKE);
-        currentPaint.setTextSize(35f);
+        currentPaint.setTextSize(50f);
         currentPaint.setTextAlign(Paint.Align.CENTER);
 
         Paint bgPaint = new Paint();

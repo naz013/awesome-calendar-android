@@ -58,6 +58,9 @@ class PageSlideAnimator extends Animator {
             mAnimationHandler.removeCallbacks(mAnimationRunnable);
             int speed = mAnimation.getSpeed();
             mDistance -= speed;
+            if (mDistance < 0) {
+                speed = speed + mDistance;
+            }
             if (mAnimationType == ANIMATION_SLIDE_LEFT) {
                 animate(mLastX - speed, mLastY);
             } else {
@@ -87,7 +90,7 @@ class PageSlideAnimator extends Animator {
 
             @Override
             public int deceleration() {
-                return 5;
+                return 7;
             }
         };
         setState(STATE_IDLE);

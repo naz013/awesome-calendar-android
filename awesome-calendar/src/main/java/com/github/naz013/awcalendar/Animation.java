@@ -28,7 +28,6 @@ public class Animation {
     private int decelerationThreshold;
 
     private int currentAcceleration;
-    private int currentDeceleration;
 
     public final void setDistance(int distance) {
         this.leftDistance = distance;
@@ -36,7 +35,6 @@ public class Animation {
         this.decelerationThreshold = distance * percentOfDeceleration() / 100;
         this.accelerationThreshold = distance - accelerationDistance;
         this.currentAcceleration = 0;
-        this.currentDeceleration = deceleration();
     }
 
     public final int getSpeed() {
@@ -47,11 +45,11 @@ public class Animation {
                 currentAcceleration += acceleration();
             }
         } else {
-            speed = currentDeceleration;
-            if (currentDeceleration > 1) {
-                currentDeceleration -= deceleration();
-                if (currentDeceleration <= 0) {
-                    currentDeceleration = 1;
+            speed = currentAcceleration;
+            if (currentAcceleration > 1) {
+                currentAcceleration -= deceleration();
+                if (currentAcceleration <= 0) {
+                    currentAcceleration = 1;
                 }
             }
         }
@@ -70,12 +68,12 @@ public class Animation {
         return 5;
     }
 
-    @IntRange(from = 3, to = 45)
+    @IntRange(from = 5, to = 45)
     public int percentOfAcceleration() {
-        return 15;
+        return 20;
     }
 
-    @IntRange(from = 3, to = 45)
+    @IntRange(from = 5, to = 45)
     public int percentOfDeceleration() {
         return 5;
     }
