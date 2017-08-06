@@ -1,7 +1,6 @@
 package com.github.naz013.awersomecalendar;
 
 import android.app.AlarmManager;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,8 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.github.naz013.awcalendar.Event;
 import com.github.naz013.awcalendar.AwesomeCalendarView;
+import com.github.naz013.awcalendar.Event;
 import com.github.naz013.awcalendar.Utils;
 
 import java.util.ArrayList;
@@ -60,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < 500; i++) {
             int rand = r.nextInt(10);
             while (rand > 0) {
-                events.add(new Event(Color.GREEN, "" + i, Utils.toDateTime(calendar.getTimeInMillis())));
+                events.add(new Event(-1, "" + i, Utils.toDateTime(calendar.getTimeInMillis())));
                 rand--;
                 i++;
             }

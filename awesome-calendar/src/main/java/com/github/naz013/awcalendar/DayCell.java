@@ -49,6 +49,7 @@ class DayCell extends Cell {
     private int mBottom;
 
     private boolean isCurrent;
+    private boolean isOut;
 
     DayCell(Rect rect, DateTime dateTime, List<Event> events) {
         this.rect = rect;
@@ -58,11 +59,19 @@ class DayCell extends Cell {
         setOffsetY(0);
     }
 
+    void setOut(boolean out) {
+        isOut = out;
+    }
+
+    boolean isOut() {
+        return isOut;
+    }
+
     void setCurrent(boolean current) {
         isCurrent = current;
     }
 
-    public boolean isCurrent() {
+    boolean isCurrent() {
         return isCurrent;
     }
 
@@ -160,6 +169,7 @@ class DayCell extends Cell {
     private void drawRectText(String text, Canvas canvas, Rect r, Painter painter) {
         Paint paint = painter.getTextPaint();
         if (isCurrent) paint = painter.getCurrentDayPaint();
+        if (isOut) paint = painter.getOutPaint();
         int numOfChars = paint.breakText(text, true, r.width(), null);
         int start = (text.length() - numOfChars) / 2;
         canvas.drawText(text, start, start + numOfChars, r.exactCenterX(), r.exactCenterY(), paint);

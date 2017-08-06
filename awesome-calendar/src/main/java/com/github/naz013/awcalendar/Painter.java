@@ -33,9 +33,18 @@ class Painter {
     private Paint textPaint;
     private Paint eventPaint;
     private Paint currentDayPaint;
+    private Paint outPaint;
 
     Painter(Paint textPaint) {
         this.textPaint = textPaint;
+    }
+
+    Paint getOutPaint() {
+        return outPaint;
+    }
+
+    void setOutPaint(Paint outPaint) {
+        this.outPaint = outPaint;
     }
 
     Paint getCurrentDayPaint() {
@@ -66,11 +75,11 @@ class Painter {
         return textPaint;
     }
 
-    public void setTextPaint(Paint textPaint) {
+    void setTextPaint(Paint textPaint) {
         this.textPaint = textPaint;
     }
 
-    public Paint getEventPaint() {
+    Paint getEventPaint() {
         return eventPaint;
     }
 

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/colorAccent"
     android:orientation="vertical"
     tools:context="com.github.naz013.awersomecalendar.MainActivity">
@@ -11,7 +12,11 @@
         android:id="@+id/calendar_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary" />
+        app:ac_out_of_bounds_days="true"
+        app:ac_day_bg_color="@color/colorPrimary"
+        app:ac_day_border_color="#ffffff"
+        app:ac_day_text_color="#ffffff"
+        app:ac_start_day_of_week="sunday"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list_view"
