@@ -25,7 +25,6 @@ import hirondelle.date4j.DateTime;
 class CollapseExpandAnimator extends Animator {
 
     private static final long ANIMATION_DELAY = 13L;
-    private static final int ANIMATION_SPEED_PIXELS = 15;
 
     private static final String TAG = "CollapseExpandAnimator";
 
@@ -41,7 +40,8 @@ class CollapseExpandAnimator extends Animator {
     private int mLastX;
     private int mLastY;
 
-    private int mAnimation;
+    private int mAnimationType;
+    private Animation mAnimation;
     private int mDistance;
     private long mDelay = ANIMATION_DELAY;
 
@@ -53,16 +53,17 @@ class CollapseExpandAnimator extends Animator {
         @Override
         public void run() {
             mAnimationHandler.removeCallbacks(mAnimationRunnable);
-            mDistance -= ANIMATION_SPEED_PIXELS;
-            if (mAnimation == ANIMATION_COLLAPSE) {
-                animate(mLastX, mLastY - ANIMATION_SPEED_PIXELS);
+            int speed = mAnimation.getSpeed();
+            mDistance -= speed;
+            if (mAnimationType == ANIMATION_COLLAPSE) {
+                animate(mLastX, mLastY - speed);
             } else {
-                animate(mLastX, mLastY + ANIMATION_SPEED_PIXELS);
+                animate(mLastX, mLastY + speed);
             }
             if (mDistance > 0) {
                 mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
             } else {
-                if (mAnimation == ANIMATION_COLLAPSE) {
+                if (mAnimationType == ANIMATION_COLLAPSE) {
                     setState(STATE_COLLAPSED);
                 } else {
                     setState(STATE_EXPANDED);
@@ -73,7 +74,12 @@ class CollapseExpandAnimator extends Animator {
 
     CollapseExpandAnimator(MonthWeekView view) {
         this.mView = view;
+        mAnimation = new Animation();
         setState(STATE_EXPANDED);
+    }
+
+    void setAnimation(Animation animation) {
+        this.mAnimation = animation;
     }
 
     MonthCell getCell() {
@@ -96,11 +102,12 @@ class CollapseExpandAnimator extends Animator {
     private void expand(int x, int y) {
         start(x, y);
         mDistance = mCell.getExpandDistance();
-        mAnimation = ANIMATION_EXPAND;
+        mAnimationType = ANIMATION_EXPAND;
         Log.d(TAG, "expand: " + mDistance);
         if (mDistance > 0) {
             float delay = 1000f / (float) mDistance;
             mDelay = (int) delay;
+            mAnimation.setDistance(mDistance);
             mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
         } else {
             setState(STATE_EXPANDED);
@@ -110,11 +117,12 @@ class CollapseExpandAnimator extends Animator {
     private void collapse(int x, int y) {
         start(x, y);
         mDistance = mCell.getCollapseDistance();
-        mAnimation = ANIMATION_COLLAPSE;
+        mAnimationType = ANIMATION_COLLAPSE;
         Log.d(TAG, "collapse: " + mDistance);
         if (mDistance > 0) {
             float delay = 1000f / (float) mDistance;
             mDelay = (int) delay;
+            mAnimation.setDistance(mDistance);
             mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
         } else {
             setState(STATE_COLLAPSED);

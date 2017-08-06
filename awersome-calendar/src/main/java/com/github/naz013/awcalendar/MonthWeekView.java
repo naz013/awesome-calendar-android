@@ -105,6 +105,14 @@ public class MonthWeekView extends View implements PageSlideAnimator.OnStateList
         return mDateLongClickListener;
     }
 
+    public void setCollapseExpandAnimation(Animation animation) {
+        mColExpAnimator.setAnimation(animation);
+    }
+
+    public void setPageSlideAnimation(Animation animation) {
+        mColExpAnimator.setAnimation(animation);
+    }
+
     public void setEvents(List<Event> events) {
         for (Event event : events) {
             normalizeDate(event);

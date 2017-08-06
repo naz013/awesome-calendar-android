@@ -29,7 +29,6 @@ class PageSlideAnimator extends Animator {
     static final int STATE_SLIDE_LEFT = 2;
 
     private static final long ANIMATION_DELAY = 13L;
-    private static final int ANIMATION_SPEED_PIXELS = 30;
 
     private static final int ANIMATION_SLIDE_LEFT = 3;
     private static final int ANIMATION_SLIDE_RIGHT = 4;
@@ -45,7 +44,8 @@ class PageSlideAnimator extends Animator {
     private MonthWeekView mView;
 
     private int mDistance;
-    private int mAnimation;
+    private Animation mAnimation;
+    private int mAnimationType;
     private long mDelay = ANIMATION_DELAY;
 
     private int mState;
@@ -56,11 +56,12 @@ class PageSlideAnimator extends Animator {
         @Override
         public void run() {
             mAnimationHandler.removeCallbacks(mAnimationRunnable);
-            mDistance -= ANIMATION_SPEED_PIXELS;
-            if (mAnimation == ANIMATION_SLIDE_LEFT) {
-                animate(mLastX - ANIMATION_SPEED_PIXELS, mLastY);
+            int speed = mAnimation.getSpeed();
+            mDistance -= speed;
+            if (mAnimationType == ANIMATION_SLIDE_LEFT) {
+                animate(mLastX - speed, mLastY);
             } else {
-                animate(mLastX + ANIMATION_SPEED_PIXELS, mLastY);
+                animate(mLastX + speed, mLastY);
             }
             if (mDistance > 0) {
                 mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
@@ -78,7 +79,12 @@ class PageSlideAnimator extends Animator {
 
     PageSlideAnimator(MonthWeekView monthWeekView) {
         this.mView = monthWeekView;
+        this.mAnimation = new Animation();
         setState(STATE_IDLE);
+    }
+
+    void setAnimation(Animation animation) {
+        this.mAnimation = animation;
     }
 
     ContainerCell getCurrent() {
@@ -115,21 +121,21 @@ class PageSlideAnimator extends Animator {
             } else {
                 mDistance = mCurrentCell.getLeft();
             }
-            mAnimation = ANIMATION_SLIDE_LEFT;
+            mAnimationType = ANIMATION_SLIDE_LEFT;
         } else {
             if (dP < dC || mCurrentCell.getLeft() > 0) {
                 mDistance = mPrevCell.getLeft();
             } else {
                 mDistance = mCurrentCell.getLeft();
             }
-            mAnimation = ANIMATION_SLIDE_RIGHT;
+            mAnimationType = ANIMATION_SLIDE_RIGHT;
         }
         mDistance = Math.abs(mDistance);
         if (mDistance > 0) {
             if (mDistance % 30 != 0) {
                 int off = (mDistance % 30);
                 mDistance -= off;
-                if (mAnimation == ANIMATION_SLIDE_LEFT) {
+                if (mAnimationType == ANIMATION_SLIDE_LEFT) {
                     animate(mLastX - off, mLastY);
                 } else {
                     animate(mLastX + off, mLastY);
@@ -137,6 +143,7 @@ class PageSlideAnimator extends Animator {
             }
             float delay = 1000f / (float) mDistance;
             mDelay = Math.abs((int) delay);
+            mAnimation.setDistance(mDistance);
             mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
         }
     }
