@@ -255,10 +255,12 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     }
 
     private DateTime shiftMonth(DateTime dateTime, int offset) {
+        DateTime dt = new DateTime(dateTime.getYear(), dateTime.getMonth(),
+                dateTime.getDay(), 15, 0, 0, 0);
         if (offset > 0) {
-            return dateTime.plusDays(30);
+            return dt.plusDays(30);
         } else {
-            return dateTime.minusDays(30);
+            return dt.minusDays(30);
         }
     }
 
@@ -369,7 +371,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
         } else if (state == PageSlideAnimator.STATE_SLIDE_RIGHT) {
             calculateCalendar(1);
         } else if (state == CollapseExpandAnimator.STATE_COLLAPSED) {
-            mAnimator = mSlideAnimator;
+//            mAnimator = mSlideAnimator;
             calculateCalendar(0);
         } else if (state == CollapseExpandAnimator.STATE_EXPANDED) {
             calculateCalendar(0);
