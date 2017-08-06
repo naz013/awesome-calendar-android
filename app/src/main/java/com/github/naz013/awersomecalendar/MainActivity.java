@@ -1,5 +1,7 @@
 package com.github.naz013.awersomecalendar;
 
+import android.app.AlarmManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,7 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.github.naz013.awcalendar.Event;
 import com.github.naz013.awcalendar.MonthWeekView;
+import com.github.naz013.awcalendar.Utils;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Random;
 
 import hirondelle.date4j.DateTime;
 
@@ -30,10 +39,28 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "onDateClicked: " + dateTime);
             }
         });
+        calendarView.setEvents(getEvents());
 
         RecyclerView rv = findViewById(R.id.list_view);
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(new SimpleAdapter());
+    }
+
+    private List<Event> getEvents() {
+        List<Event> events = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        Random r = new Random();
+        for (int i = 0; i < 500; i++) {
+            int rand = r.nextInt(10);
+            while (rand > 0) {
+                events.add(new Event(Color.GREEN, "" + i, Utils.toDateTime(calendar.getTimeInMillis())));
+                rand--;
+                i++;
+            }
+            calendar.setTimeInMillis(calendar.getTimeInMillis() + AlarmManager.INTERVAL_DAY);
+        }
+        return events;
     }
 
     class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.Holder> {

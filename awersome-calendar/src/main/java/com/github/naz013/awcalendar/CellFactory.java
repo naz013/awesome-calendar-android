@@ -6,6 +6,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import hirondelle.date4j.DateTime;
 
@@ -32,7 +33,8 @@ class CellFactory {
     private static final int ROWS = 6;
     private static final int COLS = 7;
 
-    static MonthCell getMonth(DateTime mRealDate, DateTime dt, DateTime anchor, int w, int h, int oX) {
+    static MonthCell getMonth(DateTime mRealDate, DateTime dt, DateTime anchor, int w, int h, int oX,
+                              Map<DateTime, List<Event>> map) {
         Log.d(TAG, "getMonth: " + dt + ", " + anchor);
         List<DateTime> dateTimes = getDateTimes(dt);
         int cellWidth = w / COLS;
@@ -46,7 +48,8 @@ class CellFactory {
                 int top = i * cellHeight;
                 int left = j * cellWidth;
                 Rect tmp = new Rect(left + offset, top, left + cellWidth + offset, top + cellHeight);
-                DayCell dayCell = new DayCell(tmp, dateTimes.get(i * 7 + j));
+                DateTime dtTmp = dateTimes.get(i * 7 + j);
+                DayCell dayCell = new DayCell(tmp, dtTmp, map.get(dtTmp));
                 if (dayCell.getDateTime().isSameDayAs(mRealDate)) {
                     dayCell.setCurrent(true);
                 }
@@ -67,7 +70,8 @@ class CellFactory {
         return cell;
     }
 
-    static WeekRow getWeek(DateTime mRealDate, DateTime dt, int w, int h, int oX) {
+    static WeekRow getWeek(DateTime mRealDate, DateTime dt, int w, int h, int oX,
+                           Map<DateTime, List<Event>> map) {
         Log.d(TAG, "getWeek: " + dt);
         List<DateTime> dateTimes = getWeekDateTimes(dt);
         int cellWidth = w / COLS;
@@ -77,7 +81,7 @@ class CellFactory {
         for (int j = 0; j < COLS; j++) {
             int left = j * cellWidth;
             Rect tmp = new Rect(left + offset, 0, left + cellWidth + offset, cellHeight);
-            DayCell dayCell = new DayCell(tmp, dateTimes.get(j));
+            DayCell dayCell = new DayCell(tmp, dateTimes.get(j), map.get(dateTimes.get(j)));
             if (dayCell.getDateTime().isSameDayAs(mRealDate)) {
                 dayCell.setCurrent(true);
             }

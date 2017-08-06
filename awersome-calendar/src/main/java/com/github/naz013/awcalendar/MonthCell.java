@@ -150,6 +150,26 @@ class MonthCell extends ContainerCell {
         return mWeeks.get(mWeeks.size() - 1).getHead();
     }
 
+    DateTime getRealHead() {
+        DateTime dt = mWeeks.get(0).getHead();
+        for (int i = 1; i < mWeeks.size(); i++) {
+            if (mWeeks.get(i).getHead().lt(dt)) {
+                dt = mWeeks.get(i).getHead();
+            }
+        }
+        return dt;
+    }
+
+    DateTime getRealTail() {
+        DateTime dt = mWeeks.get(0).getTail();
+        for (int i = 1; i < mWeeks.size(); i++) {
+            if (mWeeks.get(i).getTail().gt(dt)) {
+                dt = mWeeks.get(i).getTail();
+            }
+        }
+        return dt;
+    }
+
     @Override
     public String toString() {
         return "[MonthCell: {l - " + left +
