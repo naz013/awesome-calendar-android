@@ -16,6 +16,7 @@
         app:ac_day_bg_color="@color/colorPrimary"
         app:ac_day_border_color="#ffffff"
         app:ac_day_text_color="#ffffff"
+        app:ac_type="both"
         app:ac_start_day_of_week="sunday"/>
 
     <android.support.v7.widget.RecyclerView

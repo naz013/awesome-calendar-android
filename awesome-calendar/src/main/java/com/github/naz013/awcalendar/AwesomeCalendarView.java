@@ -54,9 +54,14 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     private static final String TAG = "git.MonthWeekView";
     private static final long LONG_CLICK_DURATION = 500;
 
+    private static final int TYPE_BOTH = 0;
+    private static final int TYPE_EXPANDED = 1;
+    private static final int TYPE_COLLAPSED = 2;
+
     private DateTime mRealDate;
     private boolean mHighlightOut;
     private int mStartDayOfWeek = 1;
+    private int mType = TYPE_BOTH;
 
     private int mWidth;
     private int mHeight;
@@ -215,7 +220,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         int borderColor = Color.BLACK;
         int textColor = Color.BLACK;
-        int outTextColor = Color.LTGRAY;
+        int outTextColor = Color.YELLOW;
         int currentTextColor = Color.RED;
         int bgColor = Color.WHITE;
         int eventColor = Color.GRAY;
@@ -224,12 +229,13 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
                     defStyleAttr, defStyleRes);
             borderColor = a.getColor(R.styleable.AwesomeCalendarView_ac_day_border_color, borderColor);
             textColor = a.getColor(R.styleable.AwesomeCalendarView_ac_day_text_color, textColor);
-            outTextColor = a.getColor(R.styleable.AwesomeCalendarView_ac_out_of_bounds_days, outTextColor);
+            outTextColor = a.getColor(R.styleable.AwesomeCalendarView_ac_day_unselected_text_color, outTextColor);
             currentTextColor = a.getColor(R.styleable.AwesomeCalendarView_ac_day_current_text_color, currentTextColor);
             bgColor = a.getColor(R.styleable.AwesomeCalendarView_ac_day_bg_color, bgColor);
             eventColor = a.getColor(R.styleable.AwesomeCalendarView_ac_event_color, eventColor);
             mHighlightOut = a.getBoolean(R.styleable.AwesomeCalendarView_ac_out_of_bounds_days, false);
             mStartDayOfWeek = a.getInt(R.styleable.AwesomeCalendarView_ac_start_day_of_week, -1);
+            mType = a.getInt(R.styleable.AwesomeCalendarView_ac_type, mType);
             if (mStartDayOfWeek == -1) {
                 mStartDayOfWeek = 1;
             } else {
@@ -276,7 +282,16 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
         mSlideAnimator = new PageSlideAnimator(this);
         mSlideAnimator.setOnStateListener(this);
 
-        mAnimator = mColExpAnimator;
+        if (mType == TYPE_BOTH) {
+            mAnimator = mColExpAnimator;
+        } else {
+            if (mType == TYPE_COLLAPSED) {
+                mColExpAnimator.setState(CollapseExpandAnimator.STATE_COLLAPSED);
+            } else {
+                mColExpAnimator.setState(CollapseExpandAnimator.STATE_EXPANDED);
+            }
+            mAnimator = mSlideAnimator;
+        }
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
@@ -290,11 +305,21 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
             return;
         }
         if (mAnimator.isEmpty()) {
-            MonthCell currentMonth = getMonthCell(mRealDate, mRealDate, 0);
-            MonthCell prevMonth = getMonthCell(shiftMonth(mRealDate, -1), mRealDate, -1);
-            MonthCell nextMonth = getMonthCell(shiftMonth(mRealDate, 1), mRealDate, 1);
-            mColExpAnimator.setCell(currentMonth);
-            mSlideAnimator.setCells(prevMonth, currentMonth, nextMonth);
+            if (mType == TYPE_EXPANDED || mType == TYPE_BOTH) {
+                MonthCell currentMonth = getMonthCell(mRealDate, mRealDate, 0);
+                MonthCell prevMonth = getMonthCell(shiftMonth(mRealDate, -1), mRealDate, -1);
+                MonthCell nextMonth = getMonthCell(shiftMonth(mRealDate, 1), mRealDate, 1);
+                mColExpAnimator.setCell(currentMonth);
+                mSlideAnimator.setCells(prevMonth, currentMonth, nextMonth);
+            } else {
+                ContainerCell current = getWeekCell(mRealDate, 0);
+                ContainerCell prev = getWeekCell(current.getHead().minusDays(7), -1);
+                ContainerCell next = getWeekCell(current.getHead().plusDays(7), 1);
+                MonthCell cell = getMonthCell(current.getTail(), current.getTail(), 0);
+                cell.setOffsetY(-cell.getCollapseDistance());
+                mColExpAnimator.setCell(cell);
+                mSlideAnimator.setCells(prev, current, next);
+            }
         } else {
             ContainerCell prev = mSlideAnimator.getPrevious();
             ContainerCell current = mSlideAnimator.getCurrent();
@@ -346,12 +371,22 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     }
 
     private WeekRow getWeekCell(DateTime dt, int oX) {
-        return CellFactory.getWeek(mRealDate, dt, mWidth, mHeight, oX, mEventsMap, mHighlightOut);
+        if (mType == TYPE_COLLAPSED) {
+            return CellFactory.getWeek(mRealDate, dt, mWidth, mHeight, oX, mEventsMap, mHighlightOut);
+        } else {
+            return CellFactory.getWeek(mRealDate, dt, mWidth, mHeight / CellFactory.ROWS,
+                    oX, mEventsMap, mHighlightOut);
+        }
     }
 
     private MonthCell getMonthCell(DateTime dt, DateTime anchor, int oX) {
-        return CellFactory.getMonth(mRealDate, dt, anchor, mWidth, mHeight, oX, mEventsMap,
-                mHighlightOut, mStartDayOfWeek);
+        if (mType == TYPE_COLLAPSED) {
+            return CellFactory.getMonth(mRealDate, dt, anchor, mWidth, mHeight, oX, mEventsMap,
+                    mHighlightOut, mStartDayOfWeek);
+        } else {
+            return CellFactory.getMonth(mRealDate, dt, anchor, mWidth, mHeight / CellFactory.ROWS,
+                    oX, mEventsMap, mHighlightOut, mStartDayOfWeek);
+        }
     }
 
     private DateTime shiftMonth(DateTime dateTime, int offset) {
@@ -399,6 +434,8 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
         if (!mTouchAnimator) {
             if (!mIsAnimationCanceled) {
                 if (Math.abs(mLastX - event.getX()) > Math.abs(mLastY - event.getY())) {
+                    mAnimator = mSlideAnimator;
+                } else if (mType != TYPE_BOTH) {
                     mAnimator = mSlideAnimator;
                 } else {
                     mAnimator = mColExpAnimator;
@@ -462,7 +499,10 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
         if (mWidth == 0 && mHeight == 0) {
             int widthPixels = View.MeasureSpec.getSize(widthMeasureSpec);
             int widthMode = View.MeasureSpec.getMode(widthMeasureSpec);
-            int height = widthPixels / 7 * 6;
+            int height = widthPixels / 7;
+            if (mType == TYPE_EXPANDED || mType == TYPE_BOTH) {
+                height *= 6;
+            }
             int newHeightSpec = View.MeasureSpec.makeMeasureSpec(height, widthMode);
             super.onMeasure(widthMeasureSpec, newHeightSpec);
         } else {

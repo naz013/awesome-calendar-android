@@ -17,5 +17,10 @@
             <enum name="friday" value="5" />
             <enum name="saturday" value="6" />
         </attr>
+        <attr name="ac_type" format="enum">
+            <enum name="both" value="0" />
+            <enum name="expanded" value="1" />
+            <enum name="collapsed" value="2" />
+        </attr>
     </declare-styleable>
 </resources>

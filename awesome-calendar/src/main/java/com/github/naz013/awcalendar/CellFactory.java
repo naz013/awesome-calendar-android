@@ -38,33 +38,32 @@ class CellFactory {
 
     private static final String TAG = "CellFactory";
 
-    private static final int ROWS = 6;
-    private static final int COLS = 7;
+    static final int ROWS = 6;
+    static final int COLS = 7;
 
-    static MonthCell getMonth(DateTime mRealDate, DateTime dt, DateTime anchor, int w, int h, int oX,
+    static MonthCell getMonth(DateTime realDate, DateTime dt, DateTime anchor, int w, int ch, int oX,
                               Map<DateTime, List<Event>> map, boolean isOutMapping, int startDayOfWeek) {
         Log.d(TAG, "getMonth: " + dt + ", " + anchor);
         List<DateTime> dateTimes = getDateTimes(dt, startDayOfWeek);
         int cellWidth = w / COLS;
-        int cellHeight = h / ROWS;
         int offset = calculateOffset(w, oX);
         List<WeekRow> weekRows = new ArrayList<>();
         int thisWeek = 0;
         for (int i = 0; i < ROWS; i++) {
             List<DayCell> cells = new ArrayList<>();
             for (int j = 0; j < COLS; j++) {
-                int top = i * cellHeight;
+                int top = i * ch;
                 int left = j * cellWidth;
-                Rect tmp = new Rect(left + offset, top, left + cellWidth + offset, top + cellHeight);
+                Rect tmp = new Rect(left + offset, top, left + cellWidth + offset, top + ch);
                 DateTime dtTmp = dateTimes.get(i * 7 + j);
                 DayCell dayCell = new DayCell(tmp, dtTmp, map.get(dtTmp));
-                if (dayCell.getDateTime().isSameDayAs(mRealDate)) {
+                if (dayCell.getDateTime().isSameDayAs(realDate)) {
                     dayCell.setCurrent(true);
                 }
                 if (isOutMapping && !isSameMonth(dtTmp, dt)) {
                     dayCell.setOut(true);
                 }
-                if (dayCell.getDateTime().isSameDayAs(anchor)) {
+                if (dayCell.getDateTime().isSameDayAs(anchor) || dayCell.getDateTime().isSameDayAs(realDate)) {
                     thisWeek = i;
                 }
                 cells.add(dayCell);
@@ -86,19 +85,18 @@ class CellFactory {
                 dt.getMonth().intValue() == anchor.getMonth().intValue());
     }
 
-    static WeekRow getWeek(DateTime mRealDate, DateTime dt, int w, int h, int oX,
+    static WeekRow getWeek(DateTime realDate, DateTime dt, int w, int ch, int oX,
                            Map<DateTime, List<Event>> map, boolean isOutMapping) {
         Log.d(TAG, "getWeek: " + dt);
         List<DateTime> dateTimes = getWeekDateTimes(dt);
         int cellWidth = w / COLS;
-        int cellHeight = h / ROWS;
         int offset = calculateOffset(w, oX);
         List<DayCell> cells = new ArrayList<>();
         for (int j = 0; j < COLS; j++) {
             int left = j * cellWidth;
-            Rect tmp = new Rect(left + offset, 0, left + cellWidth + offset, cellHeight);
+            Rect tmp = new Rect(left + offset, 0, left + cellWidth + offset, ch);
             DayCell dayCell = new DayCell(tmp, dateTimes.get(j), map.get(dateTimes.get(j)));
-            if (dayCell.getDateTime().isSameDayAs(mRealDate)) {
+            if (dayCell.getDateTime().isSameDayAs(realDate)) {
                 dayCell.setCurrent(true);
             }
             if (isOutMapping && !isSameMonth(dateTimes.get(j), dt)) {

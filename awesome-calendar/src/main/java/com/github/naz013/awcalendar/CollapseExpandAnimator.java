@@ -173,7 +173,7 @@ class CollapseExpandAnimator extends Animator {
         return false;
     }
 
-    private void setState(int state) {
+    void setState(int state) {
         this.mState = state;
         if (mOnStateListener != null) {
             mOnStateListener.onStateChanged(state);
