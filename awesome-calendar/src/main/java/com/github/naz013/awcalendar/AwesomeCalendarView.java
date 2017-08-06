@@ -8,6 +8,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
+import android.os.Handler;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -50,6 +52,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
         CollapseExpandAnimator.OnStateListener {
 
     private static final String TAG = "git.MonthWeekView";
+    private static final long LONG_CLICK_DURATION = 500;
 
     private DateTime mRealDate;
     private boolean mHighlightOut;
@@ -62,6 +65,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
 
     private int mLastEvent;
     private int mState;
+    private boolean mIsLongClick;
 
     private float mLastX;
     private float mStartX;
@@ -80,6 +84,19 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     private OnDateClickListener mDateClickListener;
     private OnDateLongClickListener mDateLongClickListener;
     private OnCurrentMonthListener mOnCurrentMonthListener;
+
+    private Handler mHandler = new Handler();
+    private Runnable mLongClickRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mHandler.removeCallbacks(mLongClickRunnable);
+            mIsLongClick = true;
+            if (mDateLongClickListener != null) {
+                mDateLongClickListener.onDateLongClicked(getSelectedPosition(mStartX, mStartY));
+            }
+            AwesomeCalendarView.super.performLongClick();
+        }
+    };
 
     public AwesomeCalendarView(Context context) {
         super(context);
@@ -146,6 +163,46 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
             evList.add(event);
             mEventsMap.put(event.dateTime, evList);
         }
+        this.calculateCalendar(0);
+        this.invalidate();
+    }
+
+    public void setBorderColor(@ColorInt int color) {
+        mPainter.getBorderPaint().setColor(color);
+    }
+
+    public void setTextColor(@ColorInt int color) {
+        mPainter.getTextPaint().setColor(color);
+    }
+
+    public void setBackgroundColor(@ColorInt int color) {
+        mPainter.getBackgroundPaint().setColor(color);
+    }
+
+    public void setOutTextColor(@ColorInt int color) {
+        mPainter.getOutPaint().setColor(color);
+    }
+
+    public void setCurrentTextColor(@ColorInt int color) {
+        mPainter.getCurrentDayPaint().setColor(color);
+    }
+
+    public void setEventColor(@ColorInt int color) {
+        mPainter.getEventPaint().setColor(color);
+    }
+
+    public void setHighlightOut(boolean highlightOut) {
+        this.mHighlightOut = highlightOut;
+    }
+
+    public void setCurrentDate(DateTime dateTime) {
+        this.mRealDate = dateTime;
+    }
+
+    /**
+     * Call this after finish setting all parameters.
+     */
+    public void update() {
         this.calculateCalendar(0);
         this.invalidate();
     }
@@ -338,6 +395,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     }
 
     private void processMove(MotionEvent event) {
+        mHandler.removeCallbacks(mLongClickRunnable);
         if (!mTouchAnimator) {
             if (!mIsAnimationCanceled) {
                 if (Math.abs(mLastX - event.getX()) > Math.abs(mLastY - event.getY())) {
@@ -361,9 +419,13 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     }
 
     private boolean processUp(MotionEvent event) {
+        mHandler.removeCallbacks(mLongClickRunnable);
         if (mLastEvent == MotionEvent.ACTION_DOWN) {
             if (mIsAnimationCanceled) {
                 mAnimator.finishAnimation((int) event.getX() + (int) mLastSlide, (int) event.getY() + (int) mLastSlide);
+            }
+            if (mIsLongClick) {
+                return true;
             }
             DateTime touchedPosition = getSelectedPosition(mStartX, mStartY);
             DateTime releasedPosition = getSelectedPosition(event.getX(), event.getY());
@@ -377,7 +439,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
             mAnimator.finishAnimation((int) event.getX() + (int) mLastSlide, (int) event.getY() + (int) mLastSlide);
         }
         mTouchAnimator = false;
-        return false;
+        return true;
     }
 
     private void processDown(MotionEvent event) {
@@ -387,6 +449,8 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
         mStartX = mLastX;
         mStartY = mLastY;
         mLastEvent = event.getAction();
+        mIsLongClick = false;
+        mHandler.postDelayed(mLongClickRunnable, LONG_CLICK_DURATION);
     }
 
     private DateTime getSelectedPosition(float x, float y) {
@@ -409,7 +473,10 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mColExpAnimator.cancelAnimation();
+        mAnimator.cancelAnimation();
+        if (mHandler != null) {
+            mHandler.removeCallbacks(mLongClickRunnable);
+        }
     }
 
     @Override
