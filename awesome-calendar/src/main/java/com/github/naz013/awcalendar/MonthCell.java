@@ -134,8 +134,8 @@ class MonthCell extends ContainerCell {
 
     @Override
     public DateTime get(int x, int y) {
-        for (WeekRow row : mWeeks) {
-            DateTime dateTime = row.get(x, y);
+        for (int i = mWeeks.size() - 1; i >= 0; i--) {
+            DateTime dateTime = mWeeks.get(i).get(x, y);
             if (dateTime != null) {
                 return dateTime;
             }

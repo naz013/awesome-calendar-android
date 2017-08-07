@@ -193,7 +193,7 @@ class DayCell extends Cell {
 
     @Override
     public DateTime get(int x, int y) {
-        if (x >= mLeft && x < mRight && y >= mTop && y < mBottom) {
+        if (x >= rect.left && x < rect.right && y >= rect.top && y < rect.bottom) {
             return dateTime;
         }
         return null;
