@@ -175,6 +175,7 @@ class DayCell extends Cell {
                 Rect r = new Rect(left, top, left + circleWidth, top + circleHeight);
                 Paint p = painter.getEventPaint();
                 if (events.get(index).color != -1) {
+                    p = painter.getEventShadowPaint();
                     p.setColor(events.get(index).color);
                 }
                 canvas.drawCircle(r.centerX(), r.centerY(), r.width() / 4f, p);

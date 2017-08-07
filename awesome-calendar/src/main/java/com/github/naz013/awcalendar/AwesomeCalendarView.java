@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.ColorInt;
+import android.support.annotation.IntRange;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -162,6 +163,10 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
         mColExpAnimator.setAnimation(animation);
     }
 
+    /**
+     * Set events to highlight it in day cells.
+     * @param events
+     */
     public void setEvents(List<Event> events) {
         for (Event event : events) {
             normalizeDate(event);
@@ -202,12 +207,27 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
         mPainter.getEventPaint().setColor(color);
     }
 
+    public void setWeekdayMarkColor(@ColorInt int color) {
+        mPainter.getWeekdayMarkPaint().setColor(color);
+    }
+
     public void setHighlightOut(boolean highlightOut) {
         this.mHighlightOut = highlightOut;
     }
 
     public void setCurrentDate(DateTime dateTime) {
         this.mRealDate = dateTime;
+    }
+
+    public void setStartDayOfWeek(@IntRange(from = 1, to = 7) int startDayOfWeek) {
+        if (startDayOfWeek < 1 || startDayOfWeek > 7) {
+            throw new IllegalArgumentException("Parameter must be in range (1-7)");
+        }
+        this.mStartDayOfWeek = startDayOfWeek;
+    }
+
+    public void setShowWeekdayMark(boolean showWeekdayMark) {
+        this.mShowWeekdayMark = showWeekdayMark;
     }
 
     /**
