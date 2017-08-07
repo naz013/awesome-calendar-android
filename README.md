@@ -4,6 +4,9 @@
 Powerful calendar widget for android. Fully written on canvas.
 Main idea: write light-weight widget without using additional Android widgets (ViewPager, RecyclerView, TextView, etc.).
 
+<img src="https://raw.githubusercontent.com/naz013/awesome-calendar-android/master/res/screenshot.png" width="300" alt="Screenshot">
+![](https://media.giphy.com/media/hmeYhSgHl7h8k/giphy.gif)
+
 ## Installation
 Download latest version with Gradle:
 ```groovy
