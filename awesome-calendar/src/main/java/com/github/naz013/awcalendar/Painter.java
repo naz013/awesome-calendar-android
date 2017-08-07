@@ -34,9 +34,18 @@ class Painter {
     private Paint eventPaint;
     private Paint currentDayPaint;
     private Paint outPaint;
+    private Paint weekdayMarkPaint;
 
     Painter(Paint textPaint) {
         this.textPaint = textPaint;
+    }
+
+    Paint getWeekdayMarkPaint() {
+        return weekdayMarkPaint;
+    }
+
+    void setWeekdayMarkPaint(Paint weekdayMarkPaint) {
+        this.weekdayMarkPaint = weekdayMarkPaint;
     }
 
     Paint getOutPaint() {

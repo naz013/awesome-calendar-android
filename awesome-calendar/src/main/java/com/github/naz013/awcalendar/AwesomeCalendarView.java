@@ -61,8 +61,10 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
 
     private DateTime mRealDate;
     private boolean mHighlightOut;
+    private boolean mShowWeekdayMark;
     private int mStartDayOfWeek = 1;
     private int mType = TYPE_BOTH;
+    static String[] sWeekdayTitles = new String[]{"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
 
     private int mWidth;
     private int mHeight;
@@ -221,6 +223,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         int borderColor = Color.BLACK;
         int textColor = Color.BLACK;
+        int weekdayTextColor = Color.BLACK;
         int outTextColor = Color.YELLOW;
         int currentTextColor = Color.RED;
         int bgColor = Color.WHITE;
@@ -234,7 +237,9 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
             currentTextColor = a.getColor(R.styleable.AwesomeCalendarView_ac_day_current_text_color, currentTextColor);
             bgColor = a.getColor(R.styleable.AwesomeCalendarView_ac_day_bg_color, bgColor);
             eventColor = a.getColor(R.styleable.AwesomeCalendarView_ac_event_color, eventColor);
-            mHighlightOut = a.getBoolean(R.styleable.AwesomeCalendarView_ac_out_of_bounds_days, false);
+            weekdayTextColor = a.getColor(R.styleable.AwesomeCalendarView_ac_weekday_mark_text_color, weekdayTextColor);
+            mHighlightOut = a.getBoolean(R.styleable.AwesomeCalendarView_ac_highlight_out_of_bounds_days, false);
+            mShowWeekdayMark = a.getBoolean(R.styleable.AwesomeCalendarView_ac_show_weekday_mark, false);
             mStartDayOfWeek = a.getInt(R.styleable.AwesomeCalendarView_ac_start_day_of_week, -1);
             mType = a.getInt(R.styleable.AwesomeCalendarView_ac_type, mType);
             if (mStartDayOfWeek == -1) {
@@ -261,6 +266,11 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
         Paint outPaint = new Paint(textPaint);
         outPaint.setColor(outTextColor);
 
+        Paint weekdayPaint = new Paint(textPaint);
+        weekdayPaint.setColor(weekdayTextColor);
+        weekdayPaint.setTextSize(20f);
+        weekdayPaint.setTextAlign(Paint.Align.LEFT);
+
         Paint bgPaint = new Paint();
         bgPaint.setAntiAlias(true);
         bgPaint.setColor(bgColor);
@@ -277,6 +287,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
         mPainter.setEventPaint(eventsPaint);
         mPainter.setCurrentDayPaint(currentPaint);
         mPainter.setOutPaint(outPaint);
+        mPainter.setWeekdayMarkPaint(weekdayPaint);
 
         mColExpAnimator = new CollapseExpandAnimator(this);
         mColExpAnimator.setOnStateListener(this);
@@ -372,22 +383,22 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     }
 
     private WeekRow getWeekCell(DateTime dt, int oX) {
-        if (mType == TYPE_COLLAPSED) {
-            return CellFactory.getWeek(mRealDate, dt, mWidth, mHeight, oX, mEventsMap, mHighlightOut);
-        } else {
-            return CellFactory.getWeek(mRealDate, dt, mWidth, mHeight / CellFactory.ROWS,
-                    oX, mEventsMap, mHighlightOut);
+        int w = mWidth;
+        int h = mHeight;
+        if (mType != TYPE_COLLAPSED) {
+            h = mHeight / CellFactory.ROWS;
         }
+        return CellFactory.getWeek(mRealDate, dt, w, h, oX, mEventsMap, mHighlightOut, mShowWeekdayMark);
     }
 
     private MonthCell getMonthCell(DateTime dt, DateTime anchor, int oX) {
-        if (mType == TYPE_COLLAPSED) {
-            return CellFactory.getMonth(mRealDate, dt, anchor, mWidth, mHeight, oX, mEventsMap,
-                    mHighlightOut, mStartDayOfWeek);
-        } else {
-            return CellFactory.getMonth(mRealDate, dt, anchor, mWidth, mHeight / CellFactory.ROWS,
-                    oX, mEventsMap, mHighlightOut, mStartDayOfWeek);
+        int w = mWidth;
+        int h = mHeight;
+        if (mType != TYPE_COLLAPSED) {
+            h = mHeight / CellFactory.ROWS;
         }
+        return CellFactory.getMonth(mRealDate, dt, anchor, w, h, oX, mEventsMap, mHighlightOut,
+                mStartDayOfWeek, mShowWeekdayMark);
     }
 
     private DateTime shiftMonth(DateTime dateTime, int offset) {

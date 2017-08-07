@@ -36,8 +36,8 @@ import hirondelle.date4j.DateTime;
 class DayCell extends Cell {
 
     private static final String TAG = "DayCell";
+    private static final int V_DOTS = 3;
     private static final int H_DOTS = 3;
-    private static final int W_DOTS = 3;
 
     private Rect rect;
     private DateTime dateTime;
@@ -50,6 +50,7 @@ class DayCell extends Cell {
 
     private boolean isCurrent;
     private boolean isOut;
+    private boolean showWeekdays;
 
     DayCell(Rect rect, DateTime dateTime, List<Event> events) {
         this.rect = rect;
@@ -57,6 +58,14 @@ class DayCell extends Cell {
         this.events = events;
         extractInitValues();
         setOffsetY(0);
+    }
+
+    void setShowWeekdays(boolean showWeekdays) {
+        this.showWeekdays = showWeekdays;
+    }
+
+    boolean isShowWeekdays() {
+        return showWeekdays;
     }
 
     void setOut(boolean out) {
@@ -140,16 +149,23 @@ class DayCell extends Cell {
         canvas.drawRect(rect, painter.getBorderPaint());
         drawEvents(canvas, painter);
         drawRectText("" + dateTime.getDay(), canvas, rect, painter);
+        if (showWeekdays) {
+            int vMargin = rect.height() / 4;
+            int hMargin = rect.width() / 10;
+            canvas.drawText(AwesomeCalendarView.sWeekdayTitles[dateTime.getWeekDay() - 1],
+                    rect.left + hMargin, rect.top + vMargin, painter.getWeekdayMarkPaint());
+        }
     }
 
     private void drawEvents(Canvas canvas, Painter painter) {
         if (events == null || events.isEmpty()) return;
-        int circleWidth = rect.width() / W_DOTS;
-        int circleHeight = rect.height() / H_DOTS;
-        int rectTop = rect.top;
+        int vMargin = rect.height() / 3;
+        int circleWidth = rect.width() / H_DOTS;
+        int circleHeight = (rect.height() - vMargin) / V_DOTS;
+        int rectTop = rect.top + vMargin;
         int rectLeft = rect.left;
-        for (int i = 0; i < H_DOTS; i++) {
-            for (int j = 0; j < W_DOTS; j++) {
+        for (int i = 0; i < V_DOTS; i++) {
+            for (int j = 0; j < H_DOTS; j++) {
                 int index = i * 7 + j;
                 if (index >= events.size()) {
                     break;
@@ -161,7 +177,7 @@ class DayCell extends Cell {
                 if (events.get(index).color != -1) {
                     p.setColor(events.get(index).color);
                 }
-                canvas.drawCircle(r.centerX(), r.centerY(), r.width() / 3f, p);
+                canvas.drawCircle(r.centerX(), r.centerY(), r.width() / 4f, p);
             }
         }
     }
@@ -170,9 +186,9 @@ class DayCell extends Cell {
         Paint paint = painter.getTextPaint();
         if (isCurrent) paint = painter.getCurrentDayPaint();
         if (isOut) paint = painter.getOutPaint();
-        int numOfChars = paint.breakText(text, true, r.width(), null);
-        int start = (text.length() - numOfChars) / 2;
-        canvas.drawText(text, start, start + numOfChars, r.exactCenterX(), r.exactCenterY(), paint);
+        int vMargin = rect.height() / 4;
+        int hMargin = rect.width() / 6;
+        canvas.drawText(text, rect.right - hMargin, rect.top + vMargin, paint);
     }
 
     @Override
