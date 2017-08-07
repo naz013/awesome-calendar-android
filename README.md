@@ -1,7 +1,19 @@
 # awesome-calendar-android
-TODO: Write a project description
+Powerful calendar widget for android. Fully written on canvas.
+
+[![](https://jitpack.io/v/naz013/awesome-calendar-android.svg)](https://jitpack.io/#naz013/awesome-calendar-android)
+
 ## Installation
-TODO: Describe the installation process
+Download latest version with Gradle:
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compile 'com.github.naz013:awesome-calendar-android:1.0.1'
+}
+```
 ## Usage
 TODO: Write usage instructions
 ## Inspiration
