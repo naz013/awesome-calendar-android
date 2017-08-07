@@ -1,7 +1,7 @@
+[![](https://jitpack.io/v/naz013/awesome-calendar-android.svg)](https://jitpack.io/#naz013/awesome-calendar-android)
+
 # awesome-calendar-android
 Powerful calendar widget for android. Fully written on canvas.
-
-[![](https://jitpack.io/v/naz013/awesome-calendar-android.svg)](https://jitpack.io/#naz013/awesome-calendar-android)
 
 ## Installation
 Download latest version with Gradle:
