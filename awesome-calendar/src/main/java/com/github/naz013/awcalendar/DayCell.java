@@ -37,7 +37,7 @@ class DayCell extends Cell {
 
     private static final String TAG = "DayCell";
     private static final int V_DOTS = 3;
-    private static final int H_DOTS = 3;
+    private static final int H_DOTS = 4;
 
     private Rect rect;
     private DateTime dateTime;
