@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.naz013:awesome-calendar-android:1.0.1'
+    compile 'com.github.naz013:awesome-calendar-android:1.0.2'
 }
 ```
 ## Usage
