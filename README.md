@@ -2,6 +2,7 @@
 
 # awesome-calendar-android
 Powerful calendar widget for android. Fully written on canvas.
+Main idea: write light-weight widget without using additional Android widgets (ViewPager, RecyclerView, TextView, etc.).
 
 ## Installation
 Download latest version with Gradle:
@@ -16,8 +17,12 @@ dependencies {
 ```
 ## Usage
 TODO: Write usage instructions
+
 ## Inspiration
 Caldroid - https://github.com/roomorama/Caldroid
+
+## Contribution
+Library is in development, so feel free to contribute to this project.
 
 License
 -------
