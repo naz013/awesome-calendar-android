@@ -2,6 +2,7 @@ package com.github.naz013.awcalendar;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 
 import java.util.ArrayList;
@@ -174,13 +175,43 @@ class DayCell extends Cell {
                 int left = j * circleWidth + rectLeft;
                 Rect r = new Rect(left, top, left + circleWidth, top + circleHeight);
                 Paint p = painter.getEventPaint();
-                if (events.get(index).color != -1) {
+                Event event = events.get(index);
+                float gap = r.width() / 4f;
+                if (event.color != -1) {
                     p = painter.getEventShadowPaint();
-                    p.setColor(events.get(index).color);
+                    p.setColor(event.color);
                 }
-                canvas.drawCircle(r.centerX(), r.centerY(), r.width() / 4f, p);
+                if (event.shape == Shape.SQUARE) {
+                    canvas.drawRect(r.left + gap, r.top + gap, r.right - gap, r.bottom - gap, p);
+                } else if (event.shape == Shape.DIAMOND) {
+                    canvas.drawPath(getDiamond(r, gap), p);
+                } else if (event.shape == Shape.TRIANGLE) {
+                    canvas.drawPath(getTriangle(r, gap), p);
+                } else {
+                    canvas.drawCircle(r.centerX(), r.centerY(), gap, p);
+                }
             }
         }
+    }
+
+    private Path getTriangle(Rect r, float gap) {
+        Path path = new Path();
+        path.moveTo(r.left + (gap * 2f), r.top + (gap * 0.5f));
+        path.lineTo(r.right - (gap * 0.5f), r.bottom - gap);
+        path.lineTo(r.left + (gap * 0.5f), r.bottom - gap);
+        path.close();
+        return path;
+    }
+
+    private Path getDiamond(Rect r, float gap) {
+        Path path = new Path();
+        path.moveTo(r.left + (r.width() / 2), r.top + (gap * 0.5f));
+        path.lineTo(r.right - (gap * 0.5f), r.top + (r.height() / 2));
+        path.lineTo(r.right - (r.width() / 2), r.bottom - (gap * 0.5f));
+        path.lineTo(r.left + (gap * 0.5f), r.bottom - (r.height() / 2));
+        path.lineTo(r.left + (r.width() / 2), r.top + (gap * 0.5f));
+        path.close();
+        return path;
     }
 
     private void drawRectText(String text, Canvas canvas, Rect r, Painter painter) {

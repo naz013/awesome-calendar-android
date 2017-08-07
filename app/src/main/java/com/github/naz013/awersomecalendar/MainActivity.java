@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.github.naz013.awcalendar.AwesomeCalendarView;
 import com.github.naz013.awcalendar.Event;
+import com.github.naz013.awcalendar.Shape;
 import com.github.naz013.awcalendar.Utils;
 
 import java.util.ArrayList;
@@ -65,13 +66,24 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < 500; i++) {
             int rand = r.nextInt(10);
             while (rand > 0) {
-                events.add(new Event(-1, "" + i, Utils.toDateTime(calendar.getTimeInMillis())));
+                events.add(new Event(Utils.toDateTime(calendar.getTimeInMillis()), getRandomShape()));
                 rand--;
                 i++;
             }
             calendar.setTimeInMillis(calendar.getTimeInMillis() + AlarmManager.INTERVAL_DAY);
         }
         return events;
+    }
+
+    private Shape getRandomShape() {
+        int i = new Random().nextInt(50);
+        if (i % 5 == 0) {
+            return Shape.CIRCLE;
+        } else if (i % 4 == 0) {
+            return Shape.SQUARE;
+        } else if (i % 3 == 0) {
+            return Shape.DIAMOND;
+        } else return Shape.TRIANGLE;
     }
 
     class SimpleAdapter extends RecyclerView.Adapter<SimpleAdapter.Holder> {
