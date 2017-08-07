@@ -25,19 +25,19 @@ import hirondelle.date4j.DateTime;
 
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017 Nazar Suhovich
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -50,6 +50,9 @@ import hirondelle.date4j.DateTime;
 public class AwesomeCalendarView extends View implements PageSlideAnimator.OnStateListener,
         CollapseExpandAnimator.OnStateListener {
 
+    /**
+     * Option that enable/disable debug logs.
+     */
     public static boolean SHOW_LOGS = true;
 
     private static final String TAG = "git.MonthWeekView";
@@ -208,6 +211,46 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     }
 
     /**
+     * Set weekday titles list for day cell. Starts from Sunday.
+     * <p>
+     * Works only if 'ac_highlight_out_of_bounds_days' parameter enabled.
+     *
+     * @param weekdayTitles
+     */
+    public void setWeekdayTitles(List<String> weekdayTitles) {
+        if (weekdayTitles.size() < 7) {
+            throw new IllegalArgumentException("Length of titles list must be greater or equals 7!");
+        }
+        for (int i = 0; i < weekdayTitles.size(); i++) {
+            String titleTmp = weekdayTitles.get(i);
+            if (titleTmp.length() > 3) {
+                titleTmp = titleTmp.substring(0, 3);
+            }
+            AwesomeCalendarView.sWeekdayTitles[i] = titleTmp;
+        }
+    }
+
+    /**
+     * Set weekday titles array for day cell. Starts from Sunday.
+     * <p>
+     * Works only if 'ac_highlight_out_of_bounds_days' parameter enabled.
+     *
+     * @param weekdayTitles
+     */
+    public void setWeekdayTitles(String[] weekdayTitles) {
+        if (weekdayTitles.length < 7) {
+            throw new IllegalArgumentException("Length of titles array must be greater or equals 7!");
+        }
+        for (int i = 0; i < weekdayTitles.length; i++) {
+            String titleTmp = weekdayTitles[i];
+            if (titleTmp.length() > 3) {
+                titleTmp = titleTmp.substring(0, 3);
+            }
+            AwesomeCalendarView.sWeekdayTitles[i] = titleTmp;
+        }
+    }
+
+    /**
      * Call this after finish setting all parameters.
      */
     public void update() {
@@ -246,6 +289,11 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
                 mStartDayOfWeek = 1;
             } else {
                 mStartDayOfWeek += 1;
+            }
+            int titlesResId = a.getResourceId(R.styleable.AwesomeCalendarView_ac_weekday_titles, 0);
+            if (titlesResId != 0) {
+                String[] titles = getResources().getStringArray(titlesResId);
+                setWeekdayTitles(titles);
             }
         }
         Paint borderPaint = new Paint();
@@ -557,7 +605,8 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     public interface OnCurrentMonthListener {
         /**
          * Returns current year and month in view.
-         * @param year - year;
+         *
+         * @param year  - year;
          * @param month - month in range 1 - 12;
          */
         void onMonthSelected(int year, int month);

@@ -10,6 +10,7 @@
         <attr name="ac_event_color" format="color" />
         <attr name="ac_highlight_out_of_bounds_days" format="boolean" />
         <attr name="ac_show_weekday_mark" format="boolean" />
+        <attr name="ac_weekday_titles" format="reference" />
         <attr name="ac_start_day_of_week" format="enum">
             <enum name="sunday" value="0" />
             <enum name="monday" value="1" />
