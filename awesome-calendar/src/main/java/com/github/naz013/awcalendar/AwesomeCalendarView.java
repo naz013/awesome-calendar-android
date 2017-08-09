@@ -13,6 +13,7 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.IntRange;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -482,6 +483,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        long st = System.currentTimeMillis();
         canvas.drawColor(mPainter.getBackgroundPaint().getColor());
         if (this.mWidth == 0 && mHeight == 0) {
             this.mWidth = getWidth();
@@ -491,6 +493,7 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
             calculateCalendar(0);
         }
         mAnimator.onDraw(canvas, mPainter);
+        Log.d(TAG, "onDraw: " + (System.currentTimeMillis() - st));
     }
 
     @SuppressLint("ClickableViewAccessibility")

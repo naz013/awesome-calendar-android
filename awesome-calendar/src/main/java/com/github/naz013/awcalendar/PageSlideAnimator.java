@@ -35,7 +35,7 @@ class PageSlideAnimator extends Animator {
     static final int STATE_SLIDE_RIGHT = 1;
     static final int STATE_SLIDE_LEFT = 2;
 
-    private static final long ANIMATION_DELAY = 13L;
+    private static final long ANIMATION_DELAY = 15L;
 
     private static final int ANIMATION_SLIDE_LEFT = 3;
     private static final int ANIMATION_SLIDE_RIGHT = 4;
@@ -53,7 +53,6 @@ class PageSlideAnimator extends Animator {
     private int mDistance;
     private Animation mAnimation;
     private int mAnimationType;
-    private long mDelay = ANIMATION_DELAY;
     private boolean mIsAnimating;
 
     private int mState;
@@ -76,7 +75,7 @@ class PageSlideAnimator extends Animator {
             }
             if (mDistance > 0) {
                 mIsAnimating = true;
-                mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
+                mAnimationHandler.postDelayed(mAnimationRunnable, ANIMATION_DELAY);
             } else {
                 mIsAnimating = false;
                 if (mPrevCell.getLeft() == 0) {
@@ -164,10 +163,8 @@ class PageSlideAnimator extends Animator {
                     animate(mLastX + off, mLastY);
                 }
             }
-            float delay = 1000f / (float) mDistance;
-            mDelay = Math.abs((int) delay);
             mAnimation.setDistance(mDistance);
-            mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
+            mAnimationHandler.postDelayed(mAnimationRunnable, ANIMATION_DELAY);
         }
     }
 

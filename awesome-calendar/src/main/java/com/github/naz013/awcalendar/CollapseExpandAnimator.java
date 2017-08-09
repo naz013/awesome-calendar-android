@@ -31,7 +31,7 @@ import hirondelle.date4j.DateTime;
 
 class CollapseExpandAnimator extends Animator {
 
-    private static final long ANIMATION_DELAY = 13L;
+    private static final long ANIMATION_DELAY = 15L;
 
     private static final String TAG = "CollapseExpandAnimator";
 
@@ -50,7 +50,6 @@ class CollapseExpandAnimator extends Animator {
     private int mAnimationType;
     private Animation mAnimation;
     private int mDistance;
-    private long mDelay = ANIMATION_DELAY;
 
     private int mState = STATE_EXPANDED;
     private OnStateListener mOnStateListener;
@@ -70,7 +69,7 @@ class CollapseExpandAnimator extends Animator {
             }
             if (mDistance > 0) {
                 mIsAnimating = true;
-                mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
+                mAnimationHandler.postDelayed(mAnimationRunnable, ANIMATION_DELAY);
             } else {
                 mIsAnimating = false;
                 if (mAnimationType == ANIMATION_COLLAPSE) {
@@ -113,12 +112,9 @@ class CollapseExpandAnimator extends Animator {
         start(x, y);
         mDistance = mCell.getExpandDistance();
         mAnimationType = ANIMATION_EXPAND;
-        Utils.log(TAG, "expand: " + mDistance);
         if (mDistance > 0) {
-            float delay = 1000f / (float) mDistance;
-            mDelay = (int) delay;
             mAnimation.setDistance(mDistance);
-            mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
+            mAnimationHandler.postDelayed(mAnimationRunnable, ANIMATION_DELAY);
         } else {
             setState(STATE_EXPANDED);
         }
@@ -128,12 +124,9 @@ class CollapseExpandAnimator extends Animator {
         start(x, y);
         mDistance = mCell.getCollapseDistance();
         mAnimationType = ANIMATION_COLLAPSE;
-        Utils.log(TAG, "collapse: " + mDistance);
         if (mDistance > 0) {
-            float delay = 1000f / (float) mDistance;
-            mDelay = (int) delay;
             mAnimation.setDistance(mDistance);
-            mAnimationHandler.postDelayed(mAnimationRunnable, mDelay);
+            mAnimationHandler.postDelayed(mAnimationRunnable, ANIMATION_DELAY);
         } else {
             setState(STATE_COLLAPSED);
         }

@@ -43,6 +43,7 @@ class DayCell extends Cell {
     private Rect rect;
     private DateTime dateTime;
     private List<Event> events = new ArrayList<>();
+    private List<Rect> mDots = new ArrayList<>();
 
     private int mLeft;
     private int mTop;
@@ -59,6 +60,22 @@ class DayCell extends Cell {
         this.events = events;
         extractInitValues();
         setOffsetY(0);
+        generateDots();
+    }
+
+    private void generateDots() {
+        int vMargin = rect.height() / 3;
+        int circleWidth = rect.width() / H_DOTS;
+        int circleHeight = (rect.height() - vMargin) / V_DOTS;
+        int rectTop = rect.top + vMargin;
+        int rectLeft = rect.left;
+        for (int i = 0; i < V_DOTS; i++) {
+            for (int j = 0; j < H_DOTS; j++) {
+                int top = i * circleHeight + rectTop;
+                int left = j * circleWidth + rectLeft;
+                mDots.add(new Rect(left, top, left + circleWidth, top + circleHeight));
+            }
+        }
     }
 
     void setShowWeekdays(boolean showWeekdays) {
@@ -160,36 +177,31 @@ class DayCell extends Cell {
 
     private void drawEvents(Canvas canvas, Painter painter) {
         if (events == null || events.isEmpty()) return;
-        int vMargin = rect.height() / 3;
-        int circleWidth = rect.width() / H_DOTS;
-        int circleHeight = (rect.height() - vMargin) / V_DOTS;
-        int rectTop = rect.top + vMargin;
-        int rectLeft = rect.left;
-        for (int i = 0; i < V_DOTS; i++) {
-            for (int j = 0; j < H_DOTS; j++) {
-                int index = i * 7 + j;
-                if (index >= events.size()) {
-                    break;
-                }
-                int top = i * circleHeight + rectTop;
-                int left = j * circleWidth + rectLeft;
-                Rect r = new Rect(left, top, left + circleWidth, top + circleHeight);
-                Paint p = painter.getEventPaint();
-                Event event = events.get(index);
-                float gap = r.width() / 4f;
-                if (event.color != -1) {
-                    p = painter.getEventShadowPaint();
-                    p.setColor(event.color);
-                }
-                if (event.shape == Shape.SQUARE) {
-                    canvas.drawRect(r.left + gap, r.top + gap, r.right - gap, r.bottom - gap, p);
-                } else if (event.shape == Shape.DIAMOND) {
-                    canvas.drawPath(getDiamond(r, gap), p);
-                } else if (event.shape == Shape.TRIANGLE) {
-                    canvas.drawPath(getTriangle(r, gap), p);
-                } else {
-                    canvas.drawCircle(r.centerX(), r.centerY(), gap, p);
-                }
+        for (int i = 0; i < events.size(); i++) {
+            Rect r = new Rect(mDots.get(i));
+            if (getOffsetY() != 0) {
+                r.top += getOffsetY();
+                r.bottom += getOffsetY();
+            }
+            if (getOffsetX() != 0) {
+                r.left += getOffsetX();
+                r.right += getOffsetX();
+            }
+            Paint p = painter.getEventPaint();
+            Event event = events.get(i);
+            float gap = r.width() / 4f;
+            if (event.color != -1) {
+                p = painter.getEventShadowPaint();
+                p.setColor(event.color);
+            }
+            if (event.shape == Shape.SQUARE) {
+                canvas.drawRect(r.left + gap, r.top + gap, r.right - gap, r.bottom - gap, p);
+            } else if (event.shape == Shape.DIAMOND) {
+                canvas.drawPath(getDiamond(r, gap), p);
+            } else if (event.shape == Shape.TRIANGLE) {
+                canvas.drawPath(getTriangle(r, gap), p);
+            } else {
+                canvas.drawCircle(r.centerX(), r.centerY(), gap, p);
             }
         }
     }
