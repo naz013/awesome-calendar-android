@@ -2,6 +2,7 @@ package com.github.naz013.awcalendar;
 
 import android.graphics.Canvas;
 import android.os.Handler;
+import android.util.Log;
 
 import hirondelle.date4j.DateTime;
 
@@ -35,7 +36,7 @@ class PageSlideAnimator extends Animator {
     static final int STATE_SLIDE_RIGHT = 1;
     static final int STATE_SLIDE_LEFT = 2;
 
-    private static final long ANIMATION_DELAY = 15L;
+    private static final long ANIMATION_DELAY = 20L;
 
     private static final int ANIMATION_SLIDE_LEFT = 3;
     private static final int ANIMATION_SLIDE_RIGHT = 4;
@@ -91,17 +92,7 @@ class PageSlideAnimator extends Animator {
 
     PageSlideAnimator(AwesomeCalendarView awesomeCalendarView) {
         this.mView = awesomeCalendarView;
-        this.mAnimation = new Animation() {
-            @Override
-            public int acceleration() {
-                return 2;
-            }
-
-            @Override
-            public int deceleration() {
-                return 7;
-            }
-        };
+        this.mAnimation = new Animation();
         setState(STATE_IDLE);
     }
 

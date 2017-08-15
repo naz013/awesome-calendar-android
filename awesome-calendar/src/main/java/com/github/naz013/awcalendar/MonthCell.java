@@ -33,7 +33,10 @@ import hirondelle.date4j.DateTime;
 
 class MonthCell extends ContainerCell {
 
+    private static final String TAG = "MonthCell";
+
     private List<WeekRow> mWeeks = new ArrayList<>();
+    private List<DayCell> mCells = new ArrayList<>();
 
     private int bottom;
     private int left;
@@ -45,6 +48,10 @@ class MonthCell extends ContainerCell {
 
     void setWeeks(List<WeekRow> weekRowList) {
         this.mWeeks = weekRowList;
+        this.mCells.clear();
+        for (WeekRow weekRow : weekRowList) {
+            this.mCells.addAll(weekRow.getCells());
+        }
         calculateDimensions();
     }
 
@@ -84,8 +91,8 @@ class MonthCell extends ContainerCell {
 
     @Override
     public void onDraw(Canvas canvas, Painter painter) {
-        for (WeekRow row : mWeeks) {
-            row.onDraw(canvas, painter);
+        for (DayCell cell : mCells) {
+            cell.onDraw(canvas, painter);
         }
     }
 

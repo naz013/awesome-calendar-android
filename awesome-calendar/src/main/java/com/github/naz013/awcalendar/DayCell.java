@@ -37,8 +37,8 @@ import hirondelle.date4j.DateTime;
 class DayCell extends Cell {
 
     private static final String TAG = "DayCell";
-    private static final int V_DOTS = 3;
-    private static final int H_DOTS = 4;
+    private static final int V_DOTS = 2;
+    private static final int H_DOTS = 3;
 
     private Rect rect;
     private DateTime dateTime;
@@ -177,7 +177,10 @@ class DayCell extends Cell {
 
     private void drawEvents(Canvas canvas, Painter painter) {
         if (events == null || events.isEmpty()) return;
-        for (int i = 0; i < events.size(); i++) {
+        for (int i = 0; i < mDots.size(); i++) {
+            if (i >= events.size()) {
+                break;
+            }
             Rect r = new Rect(mDots.get(i));
             if (getOffsetY() != 0) {
                 r.top += getOffsetY();
@@ -229,7 +232,7 @@ class DayCell extends Cell {
     private void drawRectText(String text, Canvas canvas, Rect r, Painter painter) {
         Paint paint = painter.getTextPaint();
         if (isCurrent) paint = painter.getCurrentDayPaint();
-        if (isOut) paint = painter.getOutPaint();
+        else if (isOut) paint = painter.getOutPaint();
         int vMargin = rect.height() / 4;
         int hMargin = rect.width() / 6;
         canvas.drawText(text, rect.right - hMargin, rect.top + vMargin, paint);

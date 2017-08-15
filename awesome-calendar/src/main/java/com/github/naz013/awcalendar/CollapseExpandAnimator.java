@@ -2,6 +2,7 @@ package com.github.naz013.awcalendar;
 
 import android.graphics.Canvas;
 import android.os.Handler;
+import android.util.Log;
 
 import hirondelle.date4j.DateTime;
 
@@ -31,7 +32,7 @@ import hirondelle.date4j.DateTime;
 
 class CollapseExpandAnimator extends Animator {
 
-    private static final long ANIMATION_DELAY = 15L;
+    private static final long ANIMATION_DELAY = 20L;
 
     private static final String TAG = "CollapseExpandAnimator";
 

@@ -1,6 +1,7 @@
 package com.github.naz013.awcalendar;
 
 import android.support.annotation.IntRange;
+import android.util.Log;
 
 /**
  * MIT License
@@ -38,21 +39,23 @@ public class Animation {
 
     public final void setDistance(int distance) {
         this.leftDistance = distance;
-        int accelerationDistance = distance * percentOfAcceleration() / 100;
-        this.decelerationThreshold = distance * percentOfDeceleration() / 100;
+        int accelerationDistance = (int) ((float) distance * ((float) percentOfAcceleration() / (float) 100));
+        this.decelerationThreshold = (int) ((float) distance * ((float) percentOfDeceleration() / (float) 100));
         this.accelerationThreshold = distance - accelerationDistance;
         this.currentAcceleration = 0;
+        Log.d(TAG, "setDistance: acc " + this.accelerationThreshold + ", dec " +
+                this.decelerationThreshold + ", dist " + distance);
     }
 
     public final int getSpeed() {
+        Log.d(TAG, "getSpeed: " + currentAcceleration + ", left " + leftDistance);
         int speed;
+        speed = currentAcceleration;
         if (leftDistance > decelerationThreshold) {
-            speed = currentAcceleration;
             if (leftDistance > accelerationThreshold) {
                 currentAcceleration += acceleration();
             }
         } else {
-            speed = currentAcceleration;
             if (currentAcceleration > 1) {
                 currentAcceleration -= deceleration();
                 if (currentAcceleration <= 0) {
@@ -66,21 +69,21 @@ public class Animation {
 
     @IntRange(from = 1, to = 10)
     public int deceleration() {
-        return 5;
+        return 1;
     }
 
     @IntRange(from = 1, to = 10)
     public int acceleration() {
-        return 5;
+        return 2;
     }
 
     @IntRange(from = 5, to = 45)
     public int percentOfAcceleration() {
-        return 20;
+        return 10;
     }
 
     @IntRange(from = 5, to = 45)
     public int percentOfDeceleration() {
-        return 5;
+        return 20;
     }
 }
