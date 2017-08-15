@@ -67,6 +67,7 @@ class WeekRow extends ContainerCell {
         bottom = mBottom;
     }
 
+    @Override
     public List<DayCell> getCells() {
         return mCells;
     }

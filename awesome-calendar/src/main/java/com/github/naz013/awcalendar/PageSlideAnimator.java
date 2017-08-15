@@ -2,7 +2,9 @@ package com.github.naz013.awcalendar;
 
 import android.graphics.Canvas;
 import android.os.Handler;
-import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import hirondelle.date4j.DateTime;
 
@@ -36,7 +38,7 @@ class PageSlideAnimator extends Animator {
     static final int STATE_SLIDE_RIGHT = 1;
     static final int STATE_SLIDE_LEFT = 2;
 
-    private static final long ANIMATION_DELAY = 20L;
+    private static final long ANIMATION_DELAY = 10L;
 
     private static final int ANIMATION_SLIDE_LEFT = 3;
     private static final int ANIMATION_SLIDE_RIGHT = 4;
@@ -46,6 +48,7 @@ class PageSlideAnimator extends Animator {
     private ContainerCell mPrevCell;
     private ContainerCell mCurrentCell;
     private ContainerCell mNextCell;
+    private List<DayCell> mCells = new ArrayList<>();
 
     private int mLastX;
     private int mLastY;
@@ -116,6 +119,10 @@ class PageSlideAnimator extends Animator {
         this.mPrevCell = prevCell;
         this.mCurrentCell = currentCell;
         this.mNextCell = nextCell;
+        this.mCells.clear();
+        this.mCells.addAll(prevCell.getCells());
+        this.mCells.addAll(currentCell.getCells());
+        this.mCells.addAll(nextCell.getCells());
         Utils.log(TAG, "setCells: p " + mPrevCell);
         Utils.log(TAG, "setCells: c " + mCurrentCell);
         Utils.log(TAG, "setCells: n " + mNextCell);
@@ -210,9 +217,9 @@ class PageSlideAnimator extends Animator {
 
     @Override
     public void onDraw(Canvas canvas, Painter painter) {
-        mPrevCell.onDraw(canvas, painter);
-        mNextCell.onDraw(canvas, painter);
-        mCurrentCell.onDraw(canvas, painter);
+        for (DayCell dayCell : mCells) {
+            dayCell.onDraw(canvas, painter);
+        }
     }
 
     @Override

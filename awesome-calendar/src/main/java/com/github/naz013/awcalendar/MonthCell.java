@@ -55,6 +55,11 @@ class MonthCell extends ContainerCell {
         calculateDimensions();
     }
 
+    @Override
+    public List<DayCell> getCells() {
+        return mCells;
+    }
+
     int getExpandDistance() {
         int distance = 0;
         for (WeekRow row : mWeeks) {

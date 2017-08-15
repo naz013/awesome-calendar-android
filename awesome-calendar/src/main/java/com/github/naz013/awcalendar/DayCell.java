@@ -44,6 +44,7 @@ class DayCell extends Cell {
     private DateTime dateTime;
     private List<Event> events = new ArrayList<>();
     private List<Rect> mDots = new ArrayList<>();
+    private List<Rect> mShadowDots = new ArrayList<>();
 
     private int mLeft;
     private int mTop;
@@ -73,7 +74,9 @@ class DayCell extends Cell {
             for (int j = 0; j < H_DOTS; j++) {
                 int top = i * circleHeight + rectTop;
                 int left = j * circleWidth + rectLeft;
-                mDots.add(new Rect(left, top, left + circleWidth, top + circleHeight));
+                Rect r = new Rect(left, top, left + circleWidth, top + circleHeight);
+                mDots.add(r);
+                mShadowDots.add(new Rect(r));
             }
         }
     }
@@ -135,6 +138,13 @@ class DayCell extends Cell {
         rect.right += offsetX;
         normalize();
         super.setOffsetX(rect.left - mLeft);
+        this.mShadowDots.clear();
+        for (Rect r : mDots) {
+            Rect rr = new Rect(r);
+            rr.left += getOffsetX();
+            rr.right += getOffsetX();
+            this.mShadowDots.add(rr);
+        }
     }
 
     @Override
@@ -143,6 +153,13 @@ class DayCell extends Cell {
         rect.bottom += offsetY;
         normalize();
         super.setOffsetY(rect.top - mTop);
+        this.mShadowDots.clear();
+        for (Rect r : mDots) {
+            Rect rr = new Rect(r);
+            rr.top += getOffsetY();
+            rr.bottom += getOffsetY();
+            this.mShadowDots.add(rr);
+        }
     }
 
     private void normalize() {
@@ -177,19 +194,11 @@ class DayCell extends Cell {
 
     private void drawEvents(Canvas canvas, Painter painter) {
         if (events == null || events.isEmpty()) return;
-        for (int i = 0; i < mDots.size(); i++) {
+        for (int i = 0; i < mShadowDots.size(); i++) {
             if (i >= events.size()) {
                 break;
             }
-            Rect r = new Rect(mDots.get(i));
-            if (getOffsetY() != 0) {
-                r.top += getOffsetY();
-                r.bottom += getOffsetY();
-            }
-            if (getOffsetX() != 0) {
-                r.left += getOffsetX();
-                r.right += getOffsetX();
-            }
+            Rect r = new Rect(mShadowDots.get(i));
             Paint p = painter.getEventPaint();
             Event event = events.get(i);
             float gap = r.width() / 4f;

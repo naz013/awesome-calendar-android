@@ -1,7 +1,6 @@
 package com.github.naz013.awcalendar;
 
 import android.support.annotation.IntRange;
-import android.util.Log;
 
 /**
  * MIT License
@@ -43,12 +42,9 @@ public class Animation {
         this.decelerationThreshold = (int) ((float) distance * ((float) percentOfDeceleration() / (float) 100));
         this.accelerationThreshold = distance - accelerationDistance;
         this.currentAcceleration = 0;
-        Log.d(TAG, "setDistance: acc " + this.accelerationThreshold + ", dec " +
-                this.decelerationThreshold + ", dist " + distance);
     }
 
     public final int getSpeed() {
-        Log.d(TAG, "getSpeed: " + currentAcceleration + ", left " + leftDistance);
         int speed;
         speed = currentAcceleration;
         if (leftDistance > decelerationThreshold) {

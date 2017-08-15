@@ -32,7 +32,7 @@ import hirondelle.date4j.DateTime;
 
 class CollapseExpandAnimator extends Animator {
 
-    private static final long ANIMATION_DELAY = 20L;
+    private static final long ANIMATION_DELAY = 10L;
 
     private static final String TAG = "CollapseExpandAnimator";
 
