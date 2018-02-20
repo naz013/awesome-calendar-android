@@ -1,7 +1,9 @@
 package com.github.naz013.awcalendar;
 
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.graphics.Canvas;
-import android.os.Handler;
+import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,18 +33,13 @@ import hirondelle.date4j.DateTime;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 class PageSlideAnimator extends Animator {
 
-    private static final int STATE_IDLE = 0;
     static final int STATE_SLIDE_RIGHT = 1;
     static final int STATE_SLIDE_LEFT = 2;
+    private static final int STATE_IDLE = 0;
 
-    private static final long ANIMATION_DELAY = 10L;
-
-    private static final int ANIMATION_SLIDE_LEFT = 3;
-    private static final int ANIMATION_SLIDE_RIGHT = 4;
-
+    private static final long SLIDE_TIME = 500L;
     private static final String TAG = "PageSlideAnimator";
 
     private ContainerCell mPrevCell;
@@ -55,52 +52,17 @@ class PageSlideAnimator extends Animator {
     private AwesomeCalendarView mView;
 
     private int mDistance;
-    private Animation mAnimation;
-    private int mAnimationType;
     private boolean mIsAnimating;
 
     private int mState;
     private OnStateListener mOnStateListener;
 
-    private Handler mAnimationHandler = new Handler();
-    private Runnable mAnimationRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mAnimationHandler.removeCallbacks(mAnimationRunnable);
-            int speed = mAnimation.getSpeed();
-            mDistance -= speed;
-            if (mDistance < 0) {
-                speed = speed + mDistance;
-            }
-            if (mAnimationType == ANIMATION_SLIDE_LEFT) {
-                animate(mLastX - speed, mLastY);
-            } else {
-                animate(mLastX + speed, mLastY);
-            }
-            if (mDistance > 0) {
-                mIsAnimating = true;
-                mAnimationHandler.postDelayed(mAnimationRunnable, ANIMATION_DELAY);
-            } else {
-                mIsAnimating = false;
-                if (mPrevCell.getLeft() == 0) {
-                    setState(STATE_SLIDE_LEFT);
-                } else if (mNextCell.getLeft() == 0) {
-                    setState(STATE_SLIDE_RIGHT);
-                } else {
-                    setState(STATE_IDLE);
-                }
-            }
-        }
-    };
+    @Nullable
+    private android.animation.Animator mAnimator;
 
     PageSlideAnimator(AwesomeCalendarView awesomeCalendarView) {
         this.mView = awesomeCalendarView;
-        this.mAnimation = new Animation();
         setState(STATE_IDLE);
-    }
-
-    void setAnimation(Animation animation) {
-        this.mAnimation = animation;
     }
 
     ContainerCell getCurrent() {
@@ -141,28 +103,86 @@ class PageSlideAnimator extends Animator {
             } else {
                 mDistance = mCurrentCell.getLeft();
             }
-            mAnimationType = ANIMATION_SLIDE_LEFT;
+            mDistance = Math.abs(mDistance);
+            if (mDistance % 30 != 0) {
+                int off = (mDistance % 30);
+                mDistance -= off;
+                animate(mLastX - off, mLastY);
+            }
+            ValueAnimator animator = ValueAnimator.ofInt(mDistance, 0);
+            animator.setDuration(SLIDE_TIME);
+            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    int speed = mDistance - (Integer) animation.getAnimatedValue();
+                    mDistance -= speed;
+                    animate(mLastX - speed, mLastY);
+                }
+            });
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    mIsAnimating = false;
+                    mAnimator = null;
+                    if (mPrevCell.getLeft() == 0) {
+                        setState(STATE_SLIDE_LEFT);
+                    } else if (mNextCell.getLeft() == 0) {
+                        setState(STATE_SLIDE_RIGHT);
+                    } else {
+                        setState(STATE_IDLE);
+                    }
+                }
+
+                @Override
+                public void onAnimationStart(android.animation.Animator animation) {
+                    mIsAnimating = true;
+                }
+            });
+            animator.start();
+            mAnimator = animator;
         } else {
             if (dP < dC || mCurrentCell.getLeft() > 0) {
                 mDistance = mPrevCell.getLeft();
             } else {
                 mDistance = mCurrentCell.getLeft();
             }
-            mAnimationType = ANIMATION_SLIDE_RIGHT;
-        }
-        mDistance = Math.abs(mDistance);
-        if (mDistance > 0) {
+            mDistance = Math.abs(mDistance);
             if (mDistance % 30 != 0) {
                 int off = (mDistance % 30);
                 mDistance -= off;
-                if (mAnimationType == ANIMATION_SLIDE_LEFT) {
-                    animate(mLastX - off, mLastY);
-                } else {
-                    animate(mLastX + off, mLastY);
-                }
+                animate(mLastX + off, mLastY);
             }
-            mAnimation.setDistance(mDistance);
-            mAnimationHandler.postDelayed(mAnimationRunnable, ANIMATION_DELAY);
+            ValueAnimator animator = ValueAnimator.ofInt(mDistance, 0);
+            animator.setDuration(SLIDE_TIME);
+            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    int speed = mDistance - (Integer) animation.getAnimatedValue();
+                    mDistance -= speed;
+                    animate(mLastX + speed, mLastY);
+                }
+            });
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    mIsAnimating = false;
+                    mAnimator = null;
+                    if (mPrevCell.getLeft() == 0) {
+                        setState(STATE_SLIDE_LEFT);
+                    } else if (mNextCell.getLeft() == 0) {
+                        setState(STATE_SLIDE_RIGHT);
+                    } else {
+                        setState(STATE_IDLE);
+                    }
+                }
+
+                @Override
+                public void onAnimationStart(android.animation.Animator animation) {
+                    mIsAnimating = true;
+                }
+            });
+            animator.start();
+            mAnimator = animator;
         }
     }
 
@@ -189,8 +209,8 @@ class PageSlideAnimator extends Animator {
 
     @Override
     public boolean cancelAnimation() {
-        if (mAnimationHandler != null && mIsAnimating) {
-            mAnimationHandler.removeCallbacks(mAnimationRunnable);
+        if (mIsAnimating && mAnimator != null) {
+            mAnimator.cancel();
             return true;
         }
         return false;
