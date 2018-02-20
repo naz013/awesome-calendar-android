@@ -156,14 +156,6 @@ public class AwesomeCalendarView extends View implements PageSlideAnimator.OnSta
         this.mOnCurrentMonthListener = onCurrentMonthListener;
     }
 
-    public void setCollapseExpandAnimation(Animation animation) {
-        mColExpAnimator.setAnimation(animation);
-    }
-
-    public void setPageSlideAnimation(Animation animation) {
-        mColExpAnimator.setAnimation(animation);
-    }
-
     /**
      * Set events to highlight it in day cells.
      * @param events

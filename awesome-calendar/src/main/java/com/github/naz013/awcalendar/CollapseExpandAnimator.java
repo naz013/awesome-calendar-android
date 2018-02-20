@@ -1,8 +1,9 @@
 package com.github.naz013.awcalendar;
 
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.graphics.Canvas;
-import android.os.Handler;
-import android.util.Log;
+import android.support.annotation.Nullable;
 
 import hirondelle.date4j.DateTime;
 
@@ -29,18 +30,13 @@ import hirondelle.date4j.DateTime;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 class CollapseExpandAnimator extends Animator {
 
-    private static final long ANIMATION_DELAY = 10L;
-
     private static final String TAG = "CollapseExpandAnimator";
+    private static final long COLLAPSE_EXPAND_TIME = 500L;
 
     static final int STATE_EXPANDED = 3;
     static final int STATE_COLLAPSED = 4;
-
-    private static final int ANIMATION_EXPAND = 5;
-    private static final int ANIMATION_COLLAPSE = 6;
 
     private AwesomeCalendarView mView;
     private MonthCell mCell;
@@ -48,48 +44,17 @@ class CollapseExpandAnimator extends Animator {
     private int mLastX;
     private int mLastY;
 
-    private int mAnimationType;
-    private Animation mAnimation;
     private int mDistance;
 
     private int mState = STATE_EXPANDED;
     private OnStateListener mOnStateListener;
     private boolean mIsAnimating;
-
-    private Handler mAnimationHandler = new Handler();
-    private Runnable mAnimationRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mAnimationHandler.removeCallbacks(mAnimationRunnable);
-            int speed = mAnimation.getSpeed();
-            mDistance -= speed;
-            if (mAnimationType == ANIMATION_COLLAPSE) {
-                animate(mLastX, mLastY - speed);
-            } else {
-                animate(mLastX, mLastY + speed);
-            }
-            if (mDistance > 0) {
-                mIsAnimating = true;
-                mAnimationHandler.postDelayed(mAnimationRunnable, ANIMATION_DELAY);
-            } else {
-                mIsAnimating = false;
-                if (mAnimationType == ANIMATION_COLLAPSE) {
-                    setState(STATE_COLLAPSED);
-                } else {
-                    setState(STATE_EXPANDED);
-                }
-            }
-        }
-    };
+    @Nullable
+    private android.animation.Animator mAnimator;
 
     CollapseExpandAnimator(AwesomeCalendarView view) {
         this.mView = view;
-        mAnimation = new Animation();
         setState(STATE_EXPANDED);
-    }
-
-    void setAnimation(Animation animation) {
-        this.mAnimation = animation;
     }
 
     MonthCell getCell() {
@@ -110,24 +75,70 @@ class CollapseExpandAnimator extends Animator {
     }
 
     private void expand(int x, int y) {
+        cancelAnimation();
         start(x, y);
         mDistance = mCell.getExpandDistance();
-        mAnimationType = ANIMATION_EXPAND;
         if (mDistance > 0) {
-            mAnimation.setDistance(mDistance);
-            mAnimationHandler.postDelayed(mAnimationRunnable, ANIMATION_DELAY);
+            ValueAnimator animator = ValueAnimator.ofInt(mDistance, 0);
+            animator.setDuration(COLLAPSE_EXPAND_TIME);
+            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    int speed = mDistance - (Integer) animation.getAnimatedValue();
+                    mDistance -= speed;
+                    animate(mLastX, mLastY + speed);
+                }
+            });
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    mIsAnimating = false;
+                    mAnimator = null;
+                    setState(STATE_EXPANDED);
+                }
+
+                @Override
+                public void onAnimationStart(android.animation.Animator animation) {
+                    mIsAnimating = true;
+                }
+            });
+            animator.start();
+            mAnimator = animator;
         } else {
             setState(STATE_EXPANDED);
         }
     }
 
     private void collapse(int x, int y) {
+        cancelAnimation();
         start(x, y);
         mDistance = mCell.getCollapseDistance();
-        mAnimationType = ANIMATION_COLLAPSE;
         if (mDistance > 0) {
-            mAnimation.setDistance(mDistance);
-            mAnimationHandler.postDelayed(mAnimationRunnable, ANIMATION_DELAY);
+            ValueAnimator animator = ValueAnimator.ofInt(mDistance, 0);
+            animator.setDuration(COLLAPSE_EXPAND_TIME);
+            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    int speed = mDistance - (Integer) animation.getAnimatedValue();
+                    mDistance -= speed;
+                    animate(mLastX, mLastY - speed);
+                }
+            });
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    mIsAnimating = false;
+                    mAnimator = null;
+                    setState(STATE_COLLAPSED);
+                }
+
+                @Override
+                public void onAnimationStart(android.animation.Animator animation) {
+                    mIsAnimating = true;
+                }
+            });
+            animator.start();
+            mAnimator = animator;
         } else {
             setState(STATE_COLLAPSED);
         }
@@ -159,9 +170,8 @@ class CollapseExpandAnimator extends Animator {
 
     @Override
     public boolean cancelAnimation() {
-        if (mAnimationHandler != null && mIsAnimating) {
-            mAnimationHandler.removeCallbacks(mAnimationRunnable);
-            return true;
+        if (mIsAnimating && mAnimator != null) {
+            mAnimator.cancel();
         }
         return false;
     }
