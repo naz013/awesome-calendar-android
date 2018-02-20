@@ -2,9 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/AwersomeCalendar.iml" filepath="$PROJECT_DIR$/AwersomeCalendar.iml" />
+      <module fileurl="file://C:\Users\Nazar\StudioProjects\awesome-calendar-android\AwersomeCalendar.iml" filepath="C:\Users\Nazar\StudioProjects\awesome-calendar-android\AwersomeCalendar.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://C:\Users\Nazar\StudioProjects\awesome-calendar-android\app\app.iml" filepath="C:\Users\Nazar\StudioProjects\awesome-calendar-android\app\app.iml" />
       <module fileurl="file://$PROJECT_DIR$/awesome-calendar/awesome-calendar.iml" filepath="$PROJECT_DIR$/awesome-calendar/awesome-calendar.iml" />
+      <module fileurl="file://C:\Users\Nazar\StudioProjects\awesome-calendar-android\awesome-calendar\awesome-calendar.iml" filepath="C:\Users\Nazar\StudioProjects\awesome-calendar-android\awesome-calendar\awesome-calendar.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/awesome-calendar-android.iml" filepath="$PROJECT_DIR$/.idea/awesome-calendar-android.iml" />
     </modules>
   </component>
 </project>
