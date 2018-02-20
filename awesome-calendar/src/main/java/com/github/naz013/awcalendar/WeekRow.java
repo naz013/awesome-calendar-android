@@ -33,8 +33,6 @@ import hirondelle.date4j.DateTime;
 
 class WeekRow extends ContainerCell {
 
-    private static final String TAG = "WeekRow";
-
     private List<DayCell> mCells = new ArrayList<>();
 
     private int mBottom;

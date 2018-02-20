@@ -4,6 +4,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.graphics.Canvas;
 import android.support.annotation.Nullable;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
 import hirondelle.date4j.DateTime;
 
@@ -81,6 +83,7 @@ class CollapseExpandAnimator extends Animator {
         if (mDistance > 0) {
             ValueAnimator animator = ValueAnimator.ofInt(mDistance, 0);
             animator.setDuration(COLLAPSE_EXPAND_TIME);
+            animator.setInterpolator(new AccelerateDecelerateInterpolator());
             animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
@@ -116,6 +119,7 @@ class CollapseExpandAnimator extends Animator {
         if (mDistance > 0) {
             ValueAnimator animator = ValueAnimator.ofInt(mDistance, 0);
             animator.setDuration(COLLAPSE_EXPAND_TIME);
+            animator.setInterpolator(new DecelerateInterpolator());
             animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {

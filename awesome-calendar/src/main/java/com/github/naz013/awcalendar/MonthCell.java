@@ -33,8 +33,6 @@ import hirondelle.date4j.DateTime;
 
 class MonthCell extends ContainerCell {
 
-    private static final String TAG = "MonthCell";
-
     private List<WeekRow> mWeeks = new ArrayList<>();
     private List<DayCell> mCells = new ArrayList<>();
 

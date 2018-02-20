@@ -36,7 +36,6 @@ import hirondelle.date4j.DateTime;
 
 class DayCell extends Cell {
 
-    private static final String TAG = "DayCell";
     private static final int V_DOTS = 2;
     private static final int H_DOTS = 3;
 
