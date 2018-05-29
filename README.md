@@ -1,6 +1,9 @@
 [![](https://jitpack.io/v/naz013/awesome-calendar-android.svg)](https://jitpack.io/#naz013/awesome-calendar-android)
 
 # awesome-calendar-android
+
+<img src="logotype primary.png" width="60%" height="60%" />
+
 Powerful calendar widget for android. Fully written on canvas.
 Main idea: write light-weight widget without using additional Android widgets (ViewPager, RecyclerView, TextView, etc.).
 
