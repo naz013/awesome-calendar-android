@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Awesome Calendar</string>
+    <string-array name="weekday_titles">
+        <item>z</item>
+        <item>m</item>
+        <item>d</item>
+        <item>w</item>
+        <item>d</item>
+        <item>v</item>
+        <item>z</item>
+    </string-array>
+</resources>
