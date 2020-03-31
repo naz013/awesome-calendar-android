@@ -1,6 +1,6 @@
 package com.github.naz013.awcalendar;
 
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 
 import hirondelle.date4j.DateTime;
 
